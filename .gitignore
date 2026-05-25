@@ -1,0 +1,16 @@
+# Local save/tool leftovers
+Backups/
+backups/
+last_backup.txt
+*.log
+BodyMorpher.log
+.roundtrip_*.sav
+*.tmp
+
+# Windows noise
+Thumbs.db
+Desktop.ini
+
+# Temporary folders
+_verify_extract_*/
+_test_save_root_*/

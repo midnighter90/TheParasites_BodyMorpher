@@ -1,0 +1,119 @@
+The Parasites BodyMorpher v1.0.0
+Copyright, source availability, license terms, and disclaimer
+
+Copyright
+---------
+Copyright (c) 2026 The Parasites BodyMorpher Tool Author(s).
+All rights reserved.
+
+These terms apply to the original BodyMorpher tool code, launcher scripts,
+documentation, package layout, and release package, except for third-party
+components that are distributed under their own licenses.
+
+Source availability
+-------------------
+The source code is made available for inspection, personal non-commercial use,
+and personal non-commercial modification.
+
+Because these terms prohibit commercial use and hosting on other websites, this
+is a custom restricted source-available license and is not an OSI-approved
+open-source license.
+
+Allowed use
+-----------
+You may:
+
+  - Download, install, and use this tool for personal, non-commercial use.
+  - View and inspect the source code.
+  - Modify the source code for your own personal, non-commercial use.
+  - Keep local or private backup copies for your own personal, non-commercial
+    use.
+
+All allowed use is personal and non-commercial only.
+
+Prohibited use
+--------------
+You may not do any of the following without explicit written permission from the
+copyright holder:
+
+  - Reupload this tool.
+  - Mirror this tool.
+  - Repost this tool.
+  - Redistribute this tool.
+  - Repackage this tool.
+  - Publish or distribute modified versions of this tool.
+  - Host this tool, its source code, release archives, forks, mirrors, modified
+    versions, or derivative packages on another website, file host, launcher,
+    mod manager, package registry, repository hosting service, or repository
+    outside the official repository controlled by the copyright holder.
+  - Sell this tool.
+  - Put this tool behind a paywall.
+  - Bundle this tool with paid content.
+  - Use this tool, its source code, modified versions, derivative packages, or
+    any related material for commercial, monetized, promotional, enterprise,
+    business, paid, revenue-generating, or for-profit purposes.
+  - Charge money, points, credits, subscriptions, donations, advertising views,
+    or any other form of payment or compensation for access to this tool, its
+    source code, modified versions, derivative packages, or related material.
+
+No support
+----------
+This tool is provided without support.
+
+The author(s) have no obligation to provide installation help, bug fixes,
+compatibility updates, troubleshooting, save repair, item recovery, or any other
+assistance.
+
+No warranty
+-----------
+This tool is provided as-is and as-available, with no warranty of any kind.
+
+No guarantee is made that the tool is safe, stable, correct, complete,
+compatible, performant, secure, or suitable for any purpose.
+
+No future update guarantee
+--------------------------
+The author(s) do not guarantee compatibility with future versions of The
+Parasites, Unreal Engine, Windows, drivers, save formats, mod managers, or any
+related software.
+
+The tool may stop working at any time.
+
+Use at your own risk
+--------------------
+You are solely responsible for installing and using this tool.
+
+The author(s) are not responsible or liable for any issue caused directly or
+indirectly by this tool, including but not limited to:
+
+  - Broken saves
+  - Lost items
+  - Lost progress
+  - Crashes
+  - Freezes
+  - Performance problems
+  - Game installation damage
+  - Mod conflicts
+  - Account, launcher, or platform issues
+  - Security or system issues
+  - Any other damage, loss, or inconvenience
+
+Back up your saves before using this tool.
+
+No affiliation
+--------------
+This is an unofficial fan-made tool.
+
+It is not affiliated with, endorsed by, sponsored by, or approved by the
+developer, publisher, or rightsholder of The Parasites.
+
+Third-party components
+----------------------
+This package includes third-party software. Third-party components remain under
+their own licenses. These terms do not override third-party license rights or
+obligations.
+
+See THIRD_PARTY_NOTICES.txt and the files in the licenses folder.
+
+If there is any conflict between these terms and a third-party license, the
+third-party license governs that third-party component only.
