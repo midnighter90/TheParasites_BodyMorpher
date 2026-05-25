@@ -98,28 +98,28 @@ const PLAYER_SKILL_VALUES = [
 ];
 
 const PARASITE_SKILLS = [
-  { key: "sharp-vision", name: "SharpVision" },
-  { key: "regeneration", name: "Regeneration" },
-  { key: "thick-blood", name: "ThickBlood" },
-  { key: "oak-leather", name: "OakLeather" },
-  { key: "strong-bones", name: "StrongBones" },
-  { key: "titanium-back", name: "TitaniumBack" },
-  { key: "absorption", name: "Absorption" },
-  { key: "radiation-removal", name: "RadiationRemoval" },
-  { key: "radiation-resistance", name: "RadiationResistance" },
-  { key: "slow-metabolism", name: "SlowMetabolism" },
-  { key: "camel", name: "Camel" },
-  { key: "owl", name: "Owl" },
-  { key: "frost-resistance", name: "FrostResistance" },
-  { key: "heat-resistance", name: "HeatResistance" },
-  { key: "stone-skin", name: "StoneSkin" },
-  { key: "strong-immunity", name: "StrongImmunity" },
-  { key: "telekinesis", name: "Telekenesis" },
-  { key: "wings", name: "Wings" },
-  { key: "intuition", name: "intuition" },
-  { key: "mentality", name: "Mentality" },
-  { key: "stamina-wings", name: "StaminaWings" },
-  { key: "possession", name: "Possession" },
+  { key: "sharp-vision", name: "SharpVision", maxLevel: 1 },
+  { key: "regeneration", name: "Regeneration", maxLevel: 4 },
+  { key: "thick-blood", name: "ThickBlood", maxLevel: 4 },
+  { key: "oak-leather", name: "OakLeather", maxLevel: 4 },
+  { key: "strong-bones", name: "StrongBones", maxLevel: 4 },
+  { key: "titanium-back", name: "TitaniumBack", maxLevel: 5 },
+  { key: "absorption", name: "Absorption", maxLevel: 5 },
+  { key: "radiation-removal", name: "RadiationRemoval", maxLevel: 5 },
+  { key: "radiation-resistance", name: "RadiationResistance", maxLevel: 4 },
+  { key: "slow-metabolism", name: "SlowMetabolism", maxLevel: 6 },
+  { key: "camel", name: "Camel", maxLevel: 6 },
+  { key: "owl", name: "Owl", maxLevel: 6 },
+  { key: "frost-resistance", name: "FrostResistance", maxLevel: 4 },
+  { key: "heat-resistance", name: "HeatResistance", maxLevel: 4 },
+  { key: "stone-skin", name: "StoneSkin", maxLevel: 4 },
+  { key: "strong-immunity", name: "StrongImmunity", maxLevel: 4 },
+  { key: "telekinesis", name: "Telekenesis", maxLevel: 1 },
+  { key: "wings", name: "Wings", maxLevel: 1 },
+  { key: "intuition", name: "intuition", maxLevel: 3 },
+  { key: "mentality", name: "Mentality", maxLevel: 3 },
+  { key: "stamina-wings", name: "StaminaWings", maxLevel: 3 },
+  { key: "possession", name: "Possession", maxLevel: 1 },
 ];
 
 const DIRECT_BY_KEY = new Map(DIRECT_VALUES.map((entry) => [entry.key, entry]));
@@ -605,15 +605,18 @@ function printRecommendations() {
   console.log("Skill values:");
   console.log("  Local saves expose Run, Jump, Unarmed, Axes, Bows, Pickaxes, Wood Cutting, Build, Control, and Merger values.");
   console.log("  Some are true IntProperty levels, while others are DoubleProperty current/progress values.");
-  console.log("  Local saves show many skill values in the 1..9 range; level 10 is a plausible cap, but not enforced here.");
+  console.log("  Local saves show many player skill values in the 1..9 range; player skill-like values are not capped.");
   console.log("  No Small Arms save value was found in the tested saves.");
   console.log("");
   console.log("Totem values:");
   console.log("  Entities are stored in Player.sav and can be edited with --entities.");
   console.log("  Totem parasite abilities are stored in the TPS_BaseSaveGame.sav skill map when already present.");
+  console.log("  Totem skill max levels follow the wiki Cost column; a single Cost means a one-time 0/1 unlock.");
+  console.log("  Bulk setting Totem skills to 10 caps each skill to its own known maximum.");
   console.log("  One-shot Totem actions/items/weather changes were not found as persistent editable skill values.");
   console.log("");
-  console.log("BodyMorpher does not clamp your input. Any finite number is accepted.");
+  console.log("Body, morph, and player skill-like values are not capped by BodyMorpher.");
+  console.log("Known Totem skill values are capped to their wiki Cost-derived maximums.");
   console.log("You are responsible for choosing values and checking the result in-game.");
 }
 
@@ -653,6 +656,18 @@ function parseIntValue(raw, label) {
     throw new Error(`${label} is outside the signed 32-bit integer range`);
   }
   return value;
+}
+
+function parseParasiteSkillLevel(raw, entry, label) {
+  const value = parseIntValue(raw, label);
+  if (value < 0 || value > entry.maxLevel) {
+    throw new Error(`${label} must be 0..${entry.maxLevel} for ${entry.name}, got: ${raw}`);
+  }
+  return value;
+}
+
+function cappedParasiteSkillLevel(value, entry) {
+  return Math.max(0, Math.min(value, entry.maxLevel));
 }
 
 function parseSetOptions(args, startIndex) {
@@ -715,20 +730,21 @@ function parseSkillSetOptions(args, startIndex) {
     if (key === "all" || key === "all-skills") {
       const value = parseIntValue(valueRaw, arg);
       for (const entry of PLAYER_SKILL_VALUES.filter((item) => item.level)) changes.player.set(entry.property, value);
-      for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, value);
+      for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, cappedParasiteSkillLevel(value, entry));
     } else if (key === "all-player-levels") {
       const value = parseIntValue(valueRaw, arg);
       for (const entry of PLAYER_SKILL_VALUES.filter((item) => item.level)) changes.player.set(entry.property, value);
     } else if (key === "all-parasite-skills") {
       const value = parseIntValue(valueRaw, arg);
-      for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, value);
+      for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, cappedParasiteSkillLevel(value, entry));
     } else if (PLAYER_SKILL_BY_KEY.has(key)) {
       const entry = PLAYER_SKILL_BY_KEY.get(key);
       const value = entry.type === "int" ? parseIntValue(valueRaw, arg) : parseFiniteValue(valueRaw, arg);
       changes.player.set(entry.property, value);
     } else if (PARASITE_SKILL_BY_KEY.has(key)) {
-      const value = parseIntValue(valueRaw, arg);
-      changes.parasite.set(PARASITE_SKILL_BY_KEY.get(key).name, value);
+      const entry = PARASITE_SKILL_BY_KEY.get(key);
+      const value = parseParasiteSkillLevel(valueRaw, entry, arg);
+      changes.parasite.set(entry.name, value);
     } else {
       throw new Error(`Unknown skill option: --${key}`);
     }
@@ -756,7 +772,7 @@ function hasSkillChanges(changes) {
 function plannedSkillChangesFromAll(value) {
   const changes = { player: new Map(), parasite: new Map() };
   for (const entry of PLAYER_SKILL_VALUES.filter((item) => item.level)) changes.player.set(entry.property, value);
-  for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, value);
+  for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, cappedParasiteSkillLevel(value, entry));
   return changes;
 }
 
@@ -1138,7 +1154,7 @@ function printHelp() {
   console.log("  Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes");
   console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes");
   console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes");
-  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --owl 10 --yes");
+  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 1 --owl 6 --yes");
   console.log("  Start_BodyMorpher.cmd --restore <backup-folder-name> --yes");
   console.log("");
   console.log("Editable values:");
@@ -1156,7 +1172,7 @@ function printHelp() {
   console.log("");
   console.log("Editable parasite skill levels:");
   for (const entry of PARASITE_SKILLS) {
-    console.log(`  --${entry.key.padEnd(20)} ${entry.name}`);
+    console.log(`  --${entry.key.padEnd(20)} ${entry.name.padEnd(20)} max ${entry.maxLevel}`);
   }
   console.log("");
   console.log("Bulk options for --set:");
@@ -1164,9 +1180,9 @@ function printHelp() {
   console.log("  --all-morphs <value> Sets only known morph values.");
   console.log("");
   console.log("Bulk options for --set-skills:");
-  console.log("  --all <level>                 Sets known level and level-like skill values.");
+  console.log("  --all <level>                 Sets known level and level-like values; Totem skills are capped to max.");
   console.log("  --all-player-levels <level>   Sets known player skill level/current values only.");
-  console.log("  --all-parasite-skills <level> Sets known parasite skill levels only.");
+  console.log("  --all-parasite-skills <level> Sets known Totem skill levels only, capped to each max.");
   console.log("");
   console.log("Optional: set TP_SAVE_ROOT if your saves are not in the default path.");
 }

@@ -109,7 +109,7 @@ Set individual skills and skill-like stats:
 ```text
 Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
 Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes
-Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --owl 10 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 1 --owl 6 --yes
 ```
 
 Restore a backup:
@@ -127,7 +127,8 @@ Start_BodyMorpher.cmd
 
 ## Value Guidance
 
-BodyMorpher does not clamp your input. Any finite number is accepted.
+Body and morph values are not capped by BodyMorpher. Known Totem skills are
+capped separately in the skill editor.
 
 Observed `BodyWeight` behavior from local testing:
 
@@ -169,7 +170,8 @@ Merger values were found in tested saves.
 Some values are true integer levels, while others are double precision current
 or progress values.
 Local saves show many skill values in the 1..9 range.
-Level 10 is a plausible cap, but BodyMorpher does not enforce it.
+Level 10 is a plausible player-skill test value, but BodyMorpher does not cap
+player skill-like values.
 ```
 
 No explicit `Small Arms` save value was found in the tested saves. No explicit
@@ -182,6 +184,9 @@ Totem values:
 Entities are editable with --entities.
 Totem parasite abilities are editable when they already exist in the saved
 TPS_BaseSaveGame.sav skill map.
+Totem skill max levels follow the wiki `Cost` column. One Cost entry means a
+one-time unlock with max level 1; multiple Cost entries mean that many levels.
+Bulk commands cap each known Totem skill to its own maximum.
 One-shot Totem actions, item purchases, and weather changes were not found as
 persistent editable skill values in tested saves.
 ```
@@ -250,6 +255,33 @@ Parasite skill levels:
 --mentality
 --stamina-wings
 --possession
+```
+
+Known Totem skill maximums:
+
+```text
+Sharp Vision 1
+Regeneration 4
+Thick Blood 4
+Oak Leather 4
+Strong Bones 4
+Titanium Back 5
+Absorption 5
+Radiation Removal 5
+Radiation Resistance 4
+Slow Metabolism 6
+Camel 6
+Owl 6
+Frost Resistance 4
+Heat Resistance 4
+Stone Skin 4
+Strong Immunity 4
+Telekinesis 1
+Wings 1
+Intuition 3
+Mentality 3
+Stamina Wings 3
+Possession 1
 ```
 
 ## Backups

@@ -73,7 +73,7 @@ Set individual skills:
 
   Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
   Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes
-  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --owl 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 1 --owl 6 --yes
 
 Restore a backup:
 
@@ -98,7 +98,8 @@ Editable morph values
 
 Value guidance
 --------------
-BodyMorpher does not clamp your input. Any finite number is accepted.
+Body and morph values are not capped by BodyMorpher. Known Totem skills are
+capped separately in the skill editor.
 
 Observed BodyWeight behavior from local testing:
 
@@ -131,8 +132,8 @@ Skill guidance
 Run, Jump, Unarmed, Axes, Bows, Pickaxes, Wood Cutting, Build, Control, and
 Merger values were found in tested saves. Some values are true integer levels,
 while others are double precision current or progress values. Local saves show
-many skill values in the 1..9 range. Level 10 is a plausible cap, but
-BodyMorpher does not enforce it.
+many player skill values in the 1..9 range. Level 10 is a plausible
+player-skill test value, but BodyMorpher does not cap player skill-like values.
 
 No explicit Small Arms save value was found in the tested saves. No explicit
 JumpLevel integer was found either. Jump is exposed as:
@@ -145,16 +146,18 @@ Totem values:
 
   --entities edits the saved Entity currency.
   Totem parasite abilities are editable when they already exist in the saved
-  TPS_BaseSaveGame.sav skill map. One-shot Totem actions, item purchases, and
-  weather changes were not found as persistent editable skill values in tested
-  saves.
+  TPS_BaseSaveGame.sav skill map. Totem skill max levels follow the wiki Cost
+  column. One Cost entry means a one-time unlock with max level 1; multiple
+  Cost entries mean that many levels. Bulk commands cap each known Totem skill
+  to its own maximum. One-shot Totem actions, item purchases, and weather
+  changes were not found as persistent editable skill values in tested saves.
 
 Useful skill examples:
 
   Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
   Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
   Start_BodyMorpher.cmd --set-skills savegame_5 --unarmed-level 10 --axe-level 10 --pickaxe-level 10 --yes
-  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --regeneration 10 --owl 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 1 --regeneration 4 --owl 6 --yes
 
 Custom save path
 ----------------

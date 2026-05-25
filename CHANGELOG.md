@@ -16,6 +16,8 @@ Initial public portable release.
 - CLI commands for all values, morph-only values, and individual values.
 - CLI commands for all known skill level or level-like values and individual
   skill values.
+- Totem skill max levels based on the wiki `Cost` column, including one-time
+  unlocks capped to level 1.
 - Interactive menu.
 - Full slot backups before write and restore operations.
 - Restore command for BodyMorpher-created backups.
