@@ -165,6 +165,19 @@ function estimateWeightKg(bodyWeight) {
   return 46 + bodyWeight * 13;
 }
 
+function formatBodyWeight(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return formatValue(value);
+  return `${formatValue(value)} (~${estimateWeightKg(value).toFixed(1)} kg)`;
+}
+
+function formatBodyValue(key, value) {
+  return key === "body-weight" ? formatBodyWeight(value) : formatValue(value);
+}
+
+function currentBodyValueText(item) {
+  return formatBodyValue(item.key, item.value);
+}
+
 function assertPortableRuntime() {
   if (process.arch !== "x64") {
     throw new Error(`This package only includes the x64 runtime. Current architecture: ${process.arch}`);
@@ -542,10 +555,7 @@ async function analyzeSlot(slot, verbose = true) {
 function printState(state) {
   console.log("Direct body values:");
   for (const item of state.direct) {
-    const suffix = item.property === "BodyWeight" && typeof item.value === "number"
-      ? `  (~${estimateWeightKg(item.value).toFixed(1)} kg from observed scale)`
-      : "";
-    console.log(`  --${item.key.padEnd(14)} ${item.property.padEnd(12)} = ${formatValue(item.value)}${suffix}`);
+    console.log(`  --${item.key.padEnd(14)} ${item.property.padEnd(12)} = ${currentBodyValueText(item)}`);
   }
 
   console.log("");
@@ -822,7 +832,7 @@ async function writeValues(slot, changes, assumeYes = false) {
   console.log("");
   console.log("Planned changes:");
   for (const item of plan) {
-    console.log(`  --${item.key.padEnd(18)} ${item.name.padEnd(24)} ${formatValue(item.before)} -> ${formatValue(item.after)}`);
+    console.log(`  --${item.key.padEnd(18)} ${item.name.padEnd(24)} ${formatBodyValue(item.key, item.before)} -> ${formatBodyValue(item.key, item.after)}`);
   }
   if (plan.length === 0) {
     console.log("  No matching editable values found in this save.");
@@ -1109,15 +1119,20 @@ async function menu() {
     } else if (choice === "5") {
       const slot = await chooseSlot();
       if (!slot) continue;
+      const analysis = await analyzeSlot(slot, false);
       console.log("");
       console.log("Enter blank to leave a value unchanged.");
       const changes = { direct: new Map(), morphs: new Map() };
       for (const item of DIRECT_VALUES) {
-        const answer = await ask(`--${item.key} (${item.property}): `);
+        const current = analysis.state.direct.find((entry) => entry.property === item.property);
+        const currentText = current ? currentBodyValueText(current) : "missing";
+        const answer = await ask(`--${item.key} (${item.property}, current ${currentText}): `);
         if (answer.trim()) changes.direct.set(item.property, parseFiniteValue(answer, item.key));
       }
       for (const item of MORPH_VALUES) {
-        const answer = await ask(`--${item.key} (${item.morph}): `);
+        const current = analysis.state.morphs.find((entry) => entry.morph === item.morph);
+        const currentText = current ? formatValue(current.value) : "missing";
+        const answer = await ask(`--${item.key} (${item.morph}, current ${currentText}): `);
         if (answer.trim()) changes.morphs.set(item.morph, parseFiniteValue(answer, item.key));
       }
       await writeValues(slot, changes, false);

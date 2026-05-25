@@ -30,6 +30,9 @@ Useful commands:
   Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 1 --owl 6 --yes
   Start_BodyMorpher.cmd --restore <backup-folder-name> --yes
 
+The interactive individual-value editor shows the current saved value in every
+prompt. BodyWeight is shown with the estimated kg value as well.
+
 BodyWeight kg examples from local testing:
 
   BodyWeight 0.0 = about 46 kg

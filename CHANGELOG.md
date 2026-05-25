@@ -18,6 +18,8 @@ Initial public portable release.
   skill values.
 - Totem skill max levels based on the wiki `Cost` column, including one-time
   unlocks capped to level 1.
+- Interactive individual value prompts show the current saved value before
+  input; `BodyWeight` is always shown with estimated kg.
 - Interactive menu.
 - Full slot backups before write and restore operations.
 - Restore command for BodyMorpher-created backups.

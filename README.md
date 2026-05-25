@@ -62,6 +62,9 @@ Interactive menu:
 Start_BodyMorpher.cmd
 ```
 
+When using the interactive individual-value editor, every prompt shows the
+current saved value. `BodyWeight` is shown with the estimated kg value as well.
+
 List slots:
 
 ```text

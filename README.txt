@@ -45,6 +45,9 @@ List slots:
 
   Start_BodyMorpher.cmd --list
 
+The interactive individual-value editor shows the current saved value in every
+prompt. BodyWeight is shown with the estimated kg value as well.
+
 Analyze a slot:
 
   Start_BodyMorpher.cmd --analyze savegame_5

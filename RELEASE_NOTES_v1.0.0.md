@@ -22,6 +22,9 @@ TheParasites_BodyMorpher_v1.0.0.zip
 8. Load the edited slot in-game and check the result.
 9. Save normally once in-game if the result is acceptable.
 
+The interactive individual-value editor shows the current saved value in every
+prompt. `BodyWeight` is shown with the estimated kg value as well.
+
 CLI examples:
 
 ```text
