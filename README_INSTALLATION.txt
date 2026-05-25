@@ -23,6 +23,9 @@ Useful commands:
   Start_BodyMorpher.cmd --set-all savegame_5 1.0 --yes
   Start_BodyMorpher.cmd --set-morphs savegame_5 2.0 --yes
   Start_BodyMorpher.cmd --set savegame_5 --body-weight 0.5 --breast-size 1.2 --yes
+  Start_BodyMorpher.cmd --analyze-skills savegame_5
+  Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes
   Start_BodyMorpher.cmd --restore <backup-folder-name> --yes
 
 BodyWeight kg examples from local testing:
@@ -34,6 +37,11 @@ BodyWeight kg examples from local testing:
 The game was observed to clamp BodyWeight and ChestSize back to 0..1 when
 saving. Morph values above 1.0 can survive an in-game save, but extreme values
 can look distorted. BodyMorpher does not limit your input.
+
+Skill values are also editable. Local saves show many skill levels in the
+1..9 range. Level 10 is a plausible cap, but BodyMorpher does not limit your
+input. No explicit JumpLevel integer was found; jump is exposed as jump height
+and jump progress/threshold values.
 
 Use this tool at your own risk. There is no warranty, no support obligation,
 and no guarantee of compatibility with future game versions.

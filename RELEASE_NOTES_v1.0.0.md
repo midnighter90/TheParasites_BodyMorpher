@@ -29,12 +29,18 @@ Start_BodyMorpher.cmd --analyze savegame_5
 Start_BodyMorpher.cmd --set-all savegame_5 1.0 --yes
 Start_BodyMorpher.cmd --set-morphs savegame_5 2.0 --yes
 Start_BodyMorpher.cmd --set savegame_5 --body-weight 0.5 --breast-size 1.2 --hip-size 0.8 --yes
+Start_BodyMorpher.cmd --analyze-skills savegame_5
+Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes
 ```
 
 ## Purpose
 
 Edits existing `Player.sav` body values for testing and repairing character
 body state when the game does not provide a later in-game correction path.
+
+Also edits discovered skill values in `Player.sav` and the parasite
+skill-level map in `TPS_BaseSaveGame.sav`.
 
 ## Value Notes
 
@@ -49,6 +55,15 @@ BodyWeight 1.0 = about 59 kg
 The game was observed to clamp `BodyWeight` and `ChestSize` back to `0..1`
 when saving. Morph values above `1.0` survived local save/load tests, but
 extreme values can look distorted.
+
+Skill values:
+
+```text
+RunLevel, build level, bow level, and parasite skills are saved as integers.
+Level 10 is a plausible cap based on local testing, but not enforced.
+No explicit JumpLevel integer was found; jump is exposed as jump height and
+jump progress/threshold stats.
+```
 
 ## Target Version
 

@@ -52,9 +52,48 @@ const MORPH_VALUES = [
   { key: "breast-sag", morph: "BC Breast Sag1", label: "Breast sag" },
 ];
 
+const PLAYER_SKILL_VALUES = [
+  { key: "run-level", property: "RunLevel", label: "Run level", type: "int", level: true },
+  { key: "build-level", property: "LevelBuild_85_C5CC534B4DE8ACD0DFB400919501337B", label: "Build level", type: "int", level: true },
+  { key: "bow-level", property: "LevelBow_70_5BB2DAE64F0E7B2713C401B56A36648A", label: "Bow level", type: "int", level: true },
+  { key: "jump-height", property: "JumpHeight_42_3A76B27848DF699A715929986FA4A3D4", label: "Jump height", type: "double", level: false },
+  { key: "jump-progress", property: "CurrentJ_39_94D3C41E4B72767B054707ABAD91EDD2", label: "Jump progress", type: "double", level: false },
+  { key: "jump-threshold", property: "ExponentiallyJ_40_E1F3667C4D3CAA88B508CFB5A7DE0E76", label: "Jump threshold", type: "double", level: false },
+  { key: "run-power", property: "RunPower_44_7FF736B54F69EDF04D2F579469713BEE", label: "Run power", type: "double", level: false },
+  { key: "build-progress", property: "CurrentBuild_90_6D9646C141AE3D15E132B883BABFAFF7", label: "Build progress", type: "double", level: false },
+  { key: "build-threshold", property: "ExponentiallyBuild_91_9ECB053549AB51E61FF1E4A510071DB8", label: "Build threshold", type: "double", level: false },
+];
+
+const PARASITE_SKILLS = [
+  { key: "sharp-vision", name: "SharpVision" },
+  { key: "regeneration", name: "Regeneration" },
+  { key: "thick-blood", name: "ThickBlood" },
+  { key: "oak-leather", name: "OakLeather" },
+  { key: "strong-bones", name: "StrongBones" },
+  { key: "titanium-back", name: "TitaniumBack" },
+  { key: "absorption", name: "Absorption" },
+  { key: "radiation-removal", name: "RadiationRemoval" },
+  { key: "radiation-resistance", name: "RadiationResistance" },
+  { key: "slow-metabolism", name: "SlowMetabolism" },
+  { key: "camel", name: "Camel" },
+  { key: "frost-resistance", name: "FrostResistance" },
+  { key: "heat-resistance", name: "HeatResistance" },
+  { key: "stone-skin", name: "StoneSkin" },
+  { key: "strong-immunity", name: "StrongImmunity" },
+  { key: "telekinesis", name: "Telekenesis" },
+  { key: "wings", name: "Wings" },
+  { key: "intuition", name: "intuition" },
+  { key: "mentality", name: "Mentality" },
+  { key: "stamina-wings", name: "StaminaWings" },
+  { key: "possession", name: "Possession" },
+];
+
 const DIRECT_BY_KEY = new Map(DIRECT_VALUES.map((entry) => [entry.key, entry]));
 const MORPH_BY_KEY = new Map(MORPH_VALUES.map((entry) => [entry.key, entry]));
 const MORPH_BY_NAME = new Map(MORPH_VALUES.map((entry) => [entry.morph, entry]));
+const PLAYER_SKILL_BY_KEY = new Map(PLAYER_SKILL_VALUES.map((entry) => [entry.key, entry]));
+const PARASITE_SKILL_BY_KEY = new Map(PARASITE_SKILLS.map((entry) => [entry.key, entry]));
+const PARASITE_SKILL_BY_NAME = new Map(PARASITE_SKILLS.map((entry) => [entry.name, entry]));
 
 let oodleModule = null;
 let oodle = null;
@@ -127,6 +166,10 @@ function slotDir(slot) {
 
 function playerPath(slot) {
   return path.join(slotDir(slot), "Player.sav");
+}
+
+function baseSavePath(slot) {
+  return path.join(slotDir(slot), "TPS_BaseSaveGame.sav");
 }
 
 function copyDir(src, dst) {
@@ -261,17 +304,74 @@ function findNameStart(buf, name, from = 0) {
   return idx >= 0 ? idx - 4 : -1;
 }
 
-function readDoubleProperty(buf, propertyName) {
+function readScalarProperty(buf, propertyName, expectedType = null) {
   const pos = findNameStart(buf, propertyName);
   if (pos < 0) return null;
   const name = readFString(buf, pos);
   const type = readFString(buf, name.end);
-  if (type.value !== "DoubleProperty") {
-    throw new Error(`${propertyName} is ${type.value}, expected DoubleProperty`);
+  if (expectedType && type.value !== expectedType) {
+    throw new Error(`${propertyName} is ${type.value}, expected ${expectedType}`);
   }
   const valueOffset = type.end + 9;
-  if (valueOffset + 8 > buf.length) throw new Error(`${propertyName} value extends past EOF`);
-  return { name: propertyName, value: buf.readDoubleLE(valueOffset), offset: valueOffset };
+  let value = null;
+  if (type.value === "DoubleProperty") {
+    if (valueOffset + 8 > buf.length) throw new Error(`${propertyName} value extends past EOF`);
+    value = buf.readDoubleLE(valueOffset);
+  } else if (type.value === "IntProperty") {
+    if (valueOffset + 4 > buf.length) throw new Error(`${propertyName} value extends past EOF`);
+    value = buf.readInt32LE(valueOffset);
+  } else if (type.value === "BoolProperty") {
+    value = Boolean(buf[type.end + 8]);
+  } else if (expectedType) {
+    throw new Error(`${propertyName} is ${type.value}, expected ${expectedType}`);
+  }
+  return { name: propertyName, type: type.value, value, offset: valueOffset };
+}
+
+function readDoubleProperty(buf, propertyName) {
+  return readScalarProperty(buf, propertyName, "DoubleProperty");
+}
+
+function readPlayerSkillValue(buf, entry) {
+  const expected = entry.type === "int" ? "IntProperty" : "DoubleProperty";
+  const found = readScalarProperty(buf, entry.property, expected);
+  return found ? { ...entry, value: found.value, offset: found.offset } : { ...entry, value: null, offset: null };
+}
+
+function writePlayerSkillValue(buf, entry, value) {
+  const found = readPlayerSkillValue(buf, entry);
+  if (found.offset === null) throw new Error(`Player skill value not found: ${entry.property}`);
+  if (entry.type === "int") {
+    buf.writeInt32LE(value, found.offset);
+  } else {
+    buf.writeDoubleLE(value, found.offset);
+  }
+}
+
+function parseSkillLevelMap(buf) {
+  const propPos = findNameStart(buf, "Save_Current_Skill_Level_6_640A898B47AF4D2A8749C89B4E7EA387");
+  if (propPos < 0) return null;
+  const first = findNameStart(buf, "SharpVision", propPos);
+  if (first < 0) return null;
+  const countOffset = first - 4;
+  const unknownOffset = first - 8;
+  if (unknownOffset < 0) throw new Error("Invalid skill map payload offset");
+  const count = buf.readInt32LE(countOffset);
+  if (count < 0 || count > 100) throw new Error(`Unexpected skill map count: ${count}`);
+
+  let cursor = first;
+  const entries = [];
+  for (let i = 0; i < count; i += 1) {
+    const key = readFString(buf, cursor);
+    cursor = key.end;
+    if (cursor + 4 > buf.length) throw new Error(`Skill level for ${key.value} extends past EOF`);
+    const valueOffset = cursor;
+    const value = buf.readInt32LE(valueOffset);
+    cursor += 4;
+    const known = PARASITE_SKILL_BY_NAME.get(key.value);
+    entries.push({ key: known?.key || key.value, name: key.value, value, offset: valueOffset });
+  }
+  return { propPos, count, entries };
 }
 
 function parseMorphEntries(buf) {
@@ -308,6 +408,23 @@ function readBodyState(decoded) {
   return { direct, morphs, unknownMorphs };
 }
 
+async function readSkillState(slot) {
+  const player = playerPath(slot);
+  const base = baseSavePath(slot);
+  const playerDecoded = fs.existsSync(player) ? await decodeSav(player) : null;
+  const baseDecoded = fs.existsSync(base) ? await decodeSav(base) : null;
+  const playerSkills = playerDecoded ? PLAYER_SKILL_VALUES.map((entry) => readPlayerSkillValue(playerDecoded, entry)) : [];
+  const skillMap = baseDecoded ? parseSkillLevelMap(baseDecoded) : null;
+  return {
+    playerDecoded,
+    baseDecoded,
+    playerStat: fs.existsSync(player) ? fs.statSync(player) : null,
+    baseStat: fs.existsSync(base) ? fs.statSync(base) : null,
+    playerSkills,
+    parasiteSkills: skillMap?.entries || [],
+  };
+}
+
 async function analyzeSlot(slot, verbose = true) {
   const file = playerPath(slot);
   if (!fs.existsSync(file)) {
@@ -316,17 +433,23 @@ async function analyzeSlot(slot, verbose = true) {
 
   const decoded = await decodeSav(file);
   const state = readBodyState(decoded);
+  const skillState = await readSkillState(slot);
   const playerStat = fs.statSync(file);
 
   if (verbose) {
     console.log("");
     console.log(`Analysis: ${slot}`);
     console.log(`  Player.sav: ${formatBytes(playerStat.size)} raw, ${formatBytes(decoded.length)} decoded`);
+    if (skillState.baseStat && skillState.baseDecoded) {
+      console.log(`  TPS_BaseSaveGame.sav: ${formatBytes(skillState.baseStat.size)} raw, ${formatBytes(skillState.baseDecoded.length)} decoded`);
+    }
     console.log("");
     printState(state);
+    console.log("");
+    printSkillState(skillState);
   }
 
-  return { decoded, state, playerStat };
+  return { decoded, state, skillState, playerStat };
 }
 
 function printState(state) {
@@ -353,6 +476,25 @@ function printState(state) {
   }
 }
 
+function printSkillState(state) {
+  console.log("Player skill/stat values:");
+  for (const item of state.playerSkills) {
+    const note = item.level ? "level" : "stat";
+    console.log(`  --${item.key.padEnd(16)} ${item.label.padEnd(16)} = ${formatValue(item.value)} (${note})`);
+  }
+
+  console.log("");
+  console.log("Parasite skill levels:");
+  if (state.parasiteSkills.length === 0) {
+    console.log("  none found");
+    return;
+  }
+  for (const item of state.parasiteSkills) {
+    const key = PARASITE_SKILL_BY_NAME.get(item.name)?.key || item.key;
+    console.log(`  --${key.padEnd(20)} ${item.name.padEnd(20)} = ${formatValue(item.value)}`);
+  }
+}
+
 function printRecommendations() {
   console.log("");
   console.log("Observed value notes");
@@ -372,6 +514,11 @@ function printRecommendations() {
   console.log("  1.0 to 2.0 is a strong/extreme test range.");
   console.log("  2.0 survived an in-game save in testing.");
   console.log("  5.0 also survived, but looked absurd and is best treated as stress testing.");
+  console.log("");
+  console.log("Skill values:");
+  console.log("  RunLevel, Build level, Bow level, and parasite skill levels are saved as integers.");
+  console.log("  Local saves show skill levels in the 1..9 range; level 10 is a plausible cap, but not enforced here.");
+  console.log("  No explicit JumpLevel integer was found; jump is exposed as JumpHeight and jump progress/threshold stats.");
   console.log("");
   console.log("BodyMorpher does not clamp your input. Any finite number is accepted.");
   console.log("You are responsible for choosing values and checking the result in-game.");
@@ -400,6 +547,17 @@ function parseFiniteValue(raw, label) {
   const value = Number(String(raw).replace(",", "."));
   if (!Number.isFinite(value)) {
     throw new Error(`${label} must be a finite number, got: ${raw}`);
+  }
+  return value;
+}
+
+function parseIntValue(raw, label) {
+  const value = parseFiniteValue(raw, label);
+  if (!Number.isInteger(value)) {
+    throw new Error(`${label} must be an integer for a saved IntProperty, got: ${raw}`);
+  }
+  if (value < -2147483648 || value > 2147483647) {
+    throw new Error(`${label} is outside the signed 32-bit integer range`);
   }
   return value;
 }
@@ -441,6 +599,50 @@ function parseSetOptions(args, startIndex) {
   return changes;
 }
 
+function parseSkillSetOptions(args, startIndex) {
+  const changes = { player: new Map(), parasite: new Map() };
+  for (let i = startIndex; i < args.length; i += 1) {
+    let arg = args[i];
+    if (arg === "--yes") continue;
+    if (!arg.startsWith("--")) {
+      throw new Error(`Unexpected argument: ${arg}`);
+    }
+
+    let valueRaw = null;
+    if (arg.includes("=")) {
+      const split = arg.indexOf("=");
+      valueRaw = arg.slice(split + 1);
+      arg = arg.slice(0, split);
+    } else {
+      valueRaw = args[i + 1];
+      i += 1;
+    }
+
+    const key = arg.slice(2);
+    if (key === "all" || key === "all-skills") {
+      const value = parseIntValue(valueRaw, arg);
+      for (const entry of PLAYER_SKILL_VALUES.filter((item) => item.level)) changes.player.set(entry.property, value);
+      for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, value);
+    } else if (key === "all-player-levels") {
+      const value = parseIntValue(valueRaw, arg);
+      for (const entry of PLAYER_SKILL_VALUES.filter((item) => item.level)) changes.player.set(entry.property, value);
+    } else if (key === "all-parasite-skills") {
+      const value = parseIntValue(valueRaw, arg);
+      for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, value);
+    } else if (PLAYER_SKILL_BY_KEY.has(key)) {
+      const entry = PLAYER_SKILL_BY_KEY.get(key);
+      const value = entry.type === "int" ? parseIntValue(valueRaw, arg) : parseFiniteValue(valueRaw, arg);
+      changes.player.set(entry.property, value);
+    } else if (PARASITE_SKILL_BY_KEY.has(key)) {
+      const value = parseIntValue(valueRaw, arg);
+      changes.parasite.set(PARASITE_SKILL_BY_KEY.get(key).name, value);
+    } else {
+      throw new Error(`Unknown skill option: --${key}`);
+    }
+  }
+  return changes;
+}
+
 function plannedChangesFromAll(value, includeDirect) {
   const changes = { direct: new Map(), morphs: new Map() };
   if (includeDirect) {
@@ -454,6 +656,17 @@ function hasChanges(changes) {
   return changes.direct.size > 0 || changes.morphs.size > 0;
 }
 
+function hasSkillChanges(changes) {
+  return changes.player.size > 0 || changes.parasite.size > 0;
+}
+
+function plannedSkillChangesFromAll(value) {
+  const changes = { player: new Map(), parasite: new Map() };
+  for (const entry of PLAYER_SKILL_VALUES.filter((item) => item.level)) changes.player.set(entry.property, value);
+  for (const entry of PARASITE_SKILLS) changes.parasite.set(entry.name, value);
+  return changes;
+}
+
 function describePlannedChanges(state, changes) {
   const lines = [];
   for (const entry of DIRECT_VALUES) {
@@ -465,6 +678,22 @@ function describePlannedChanges(state, changes) {
     if (!changes.morphs.has(entry.morph)) continue;
     const current = state.morphs.find((item) => item.morph === entry.morph);
     lines.push({ kind: "morph", name: entry.morph, key: entry.key, before: current?.value, after: changes.morphs.get(entry.morph) });
+  }
+  return lines;
+}
+
+function describePlannedSkillChanges(state, changes) {
+  const lines = [];
+  for (const entry of PLAYER_SKILL_VALUES) {
+    if (!changes.player.has(entry.property)) continue;
+    const current = state.playerSkills.find((item) => item.property === entry.property);
+    if (!current || current.value === null) continue;
+    lines.push({ kind: "player", name: entry.label, key: entry.key, before: current.value, after: changes.player.get(entry.property) });
+  }
+  for (const entry of state.parasiteSkills) {
+    if (!changes.parasite.has(entry.name)) continue;
+    const key = PARASITE_SKILL_BY_NAME.get(entry.name)?.key || entry.key;
+    lines.push({ kind: "parasite", name: entry.name, key, before: entry.value, after: changes.parasite.get(entry.name) });
   }
   return lines;
 }
@@ -539,6 +768,103 @@ async function writeValues(slot, changes, assumeYes = false) {
   console.log(`  Backup: ${backup}`);
   console.log(`  Written: ${playerPath(slot)}`);
   console.log(`  New Player.sav size: ${formatBytes(newStat.size)}`);
+}
+
+async function analyzeSkills(slot, verbose = true) {
+  assertSlotName(slot);
+  const state = await readSkillState(slot);
+  if (verbose) {
+    console.log("");
+    console.log(`Skill analysis: ${slot}`);
+    if (state.playerStat && state.playerDecoded) {
+      console.log(`  Player.sav: ${formatBytes(state.playerStat.size)} raw, ${formatBytes(state.playerDecoded.length)} decoded`);
+    }
+    if (state.baseStat && state.baseDecoded) {
+      console.log(`  TPS_BaseSaveGame.sav: ${formatBytes(state.baseStat.size)} raw, ${formatBytes(state.baseDecoded.length)} decoded`);
+    }
+    console.log("");
+    printSkillState(state);
+  }
+  return state;
+}
+
+async function writeSkills(slot, changes, assumeYes = false) {
+  assertSlotName(slot);
+  if (!hasSkillChanges(changes)) {
+    console.log("No skill values selected for editing.");
+    return;
+  }
+  if (gameIsRunning()) {
+    throw new Error("The Parasites is still running. Please close the game completely before writing saves.");
+  }
+
+  const state = await analyzeSkills(slot, true);
+  const plan = describePlannedSkillChanges(state, changes);
+  console.log("");
+  console.log("Planned skill changes:");
+  for (const item of plan) {
+    console.log(`  --${item.key.padEnd(20)} ${item.name.padEnd(20)} ${formatValue(item.before)} -> ${formatValue(item.after)}`);
+  }
+  if (plan.length === 0) {
+    console.log("  No matching editable skill values found in this save.");
+    return;
+  }
+
+  if (!assumeYes) {
+    const ok = await askYesNo(`Create a backup and write ${plan.length} skill value(s) to ${slot}?`, false);
+    if (!ok) {
+      console.log("Cancelled.");
+      return;
+    }
+  }
+
+  const backup = makeBackup(slot, "before_skill_edit");
+  let wrotePlayer = false;
+  let wroteBase = false;
+
+  if (changes.player.size > 0) {
+    const patchedPlayer = Buffer.from(state.playerDecoded);
+    for (const [propertyName, value] of changes.player) {
+      const entry = PLAYER_SKILL_VALUES.find((item) => item.property === propertyName);
+      if (!entry) continue;
+      writePlayerSkillValue(patchedPlayer, entry, value);
+    }
+    fs.writeFileSync(playerPath(slot), await encodeSav(patchedPlayer));
+    wrotePlayer = true;
+  }
+
+  if (changes.parasite.size > 0 && state.baseDecoded) {
+    const patchedBase = Buffer.from(state.baseDecoded);
+    const skillMap = parseSkillLevelMap(patchedBase);
+    if (skillMap) {
+      for (const entry of skillMap.entries) {
+        if (!changes.parasite.has(entry.name)) continue;
+        patchedBase.writeInt32LE(changes.parasite.get(entry.name), entry.offset);
+      }
+      fs.writeFileSync(baseSavePath(slot), await encodeSav(patchedBase));
+      wroteBase = true;
+    }
+  }
+
+  const verify = await readSkillState(slot);
+  for (const [propertyName, value] of changes.player) {
+    const current = verify.playerSkills.find((item) => item.property === propertyName);
+    if (current && current.value !== null && Math.abs(current.value - value) > 1e-12) {
+      throw new Error(`Verification failed for ${propertyName}: ${current.value}`);
+    }
+  }
+  for (const [skillName, value] of changes.parasite) {
+    const current = verify.parasiteSkills.find((item) => item.name === skillName);
+    if (current && current.value !== value) {
+      throw new Error(`Verification failed for ${skillName}: ${current.value}`);
+    }
+  }
+
+  console.log("");
+  console.log("Done.");
+  console.log(`  Backup: ${backup}`);
+  if (wrotePlayer) console.log(`  Written: ${playerPath(slot)}`);
+  if (wroteBase) console.log(`  Written: ${baseSavePath(slot)}`);
 }
 
 async function restoreBackup(backupNameOrPath = null, assumeYes = false) {
@@ -649,9 +975,11 @@ async function menu() {
     console.log("  3. Set all known values");
     console.log("  4. Set morph values only");
     console.log("  5. Set individual values");
-    console.log("  6. Restore backup");
-    console.log("  7. Show recommendations");
-    console.log("  8. Exit");
+    console.log("  6. Analyze skills");
+    console.log("  7. Set all integer skill levels");
+    console.log("  8. Restore backup");
+    console.log("  9. Show recommendations");
+    console.log("  10. Exit");
     const choice = (await ask("Selection: ")).trim();
 
     if (choice === "1") {
@@ -685,10 +1013,18 @@ async function menu() {
       }
       await writeValues(slot, changes, false);
     } else if (choice === "6") {
-      await restoreBackup();
+      const slot = await chooseSlot();
+      if (slot) await analyzeSkills(slot, true);
     } else if (choice === "7") {
+      const slot = await chooseSlot();
+      if (!slot) continue;
+      const value = parseIntValue(await ask("Integer skill level for run/build/bow and parasite skills: "), "skill level");
+      await writeSkills(slot, plannedSkillChangesFromAll(value), false);
+    } else if (choice === "8") {
+      await restoreBackup();
+    } else if (choice === "9") {
       printRecommendations();
-    } else if (choice === "8" || choice === "") {
+    } else if (choice === "10" || choice === "") {
       break;
     } else {
       console.log("Invalid selection.");
@@ -701,10 +1037,14 @@ function printHelp() {
   console.log("  Start_BodyMorpher.cmd");
   console.log("  Start_BodyMorpher.cmd --list");
   console.log("  Start_BodyMorpher.cmd --analyze savegame_5");
+  console.log("  Start_BodyMorpher.cmd --analyze-skills savegame_5");
   console.log("  Start_BodyMorpher.cmd --recommendations");
   console.log("  Start_BodyMorpher.cmd --set-all savegame_5 1.0 --yes");
   console.log("  Start_BodyMorpher.cmd --set-morphs savegame_5 2.0 --yes");
   console.log("  Start_BodyMorpher.cmd --set savegame_5 --body-weight 0.5 --breast-size 1.2 --hip-size 0.8 --yes");
+  console.log("  Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes");
+  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes");
+  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --jump-height 450 --jump-progress 10 --yes");
   console.log("  Start_BodyMorpher.cmd --restore <backup-folder-name> --yes");
   console.log("");
   console.log("Editable values:");
@@ -715,9 +1055,24 @@ function printHelp() {
     console.log(`  --${entry.key.padEnd(18)} ${entry.morph}`);
   }
   console.log("");
+  console.log("Editable player skill/stat values:");
+  for (const entry of PLAYER_SKILL_VALUES) {
+    console.log(`  --${entry.key.padEnd(18)} ${entry.property}`);
+  }
+  console.log("");
+  console.log("Editable parasite skill levels:");
+  for (const entry of PARASITE_SKILLS) {
+    console.log(`  --${entry.key.padEnd(20)} ${entry.name}`);
+  }
+  console.log("");
   console.log("Bulk options for --set:");
   console.log("  --all <value>        Sets BodyWeight, ChestSize, and all known morphs.");
   console.log("  --all-morphs <value> Sets only known morph values.");
+  console.log("");
+  console.log("Bulk options for --set-skills:");
+  console.log("  --all <level>                 Sets run/build/bow and known parasite skill levels.");
+  console.log("  --all-player-levels <level>   Sets run/build/bow levels only.");
+  console.log("  --all-parasite-skills <level> Sets known parasite skill levels only.");
   console.log("");
   console.log("Optional: set TP_SAVE_ROOT if your saves are not in the default path.");
 }
@@ -751,6 +1106,14 @@ async function main() {
     return;
   }
 
+  const analyzeSkillsIndex = args.indexOf("--analyze-skills");
+  if (analyzeSkillsIndex !== -1) {
+    const slot = args[analyzeSkillsIndex + 1];
+    if (!slot) throw new Error("--analyze-skills needs a slot, e.g. savegame_5");
+    await analyzeSkills(slot, true);
+    return;
+  }
+
   const setAllIndex = args.indexOf("--set-all");
   if (setAllIndex !== -1) {
     const slot = args[setAllIndex + 1];
@@ -775,6 +1138,24 @@ async function main() {
     if (!slot) throw new Error("--set needs a slot, e.g. savegame_5");
     const changes = parseSetOptions(args, setIndex + 2);
     await writeValues(slot, changes, yes);
+    return;
+  }
+
+  const setAllSkillsIndex = args.indexOf("--set-all-skills");
+  if (setAllSkillsIndex !== -1) {
+    const slot = args[setAllSkillsIndex + 1];
+    const value = parseIntValue(args[setAllSkillsIndex + 2], "--set-all-skills");
+    if (!slot) throw new Error("--set-all-skills needs a slot, e.g. savegame_5");
+    await writeSkills(slot, plannedSkillChangesFromAll(value), yes);
+    return;
+  }
+
+  const setSkillsIndex = args.indexOf("--set-skills");
+  if (setSkillsIndex !== -1) {
+    const slot = args[setSkillsIndex + 1];
+    if (!slot) throw new Error("--set-skills needs a slot, e.g. savegame_5");
+    const changes = parseSkillSetOptions(args, setSkillsIndex + 2);
+    await writeSkills(slot, changes, yes);
     return;
   }
 

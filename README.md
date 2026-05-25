@@ -14,7 +14,8 @@ No compatibility is promised for other game versions.
 
 ## What It Does
 
-BodyMorpher edits existing character body values in `savegame_*` slots.
+BodyMorpher edits existing character body and skill values in `savegame_*`
+slots.
 
 It reads `Player.sav`, shows the currently stored values, creates a full backup
 before every write, patches selected existing `DoubleProperty` and
@@ -23,6 +24,11 @@ decoding it again.
 
 The tool only edits values that already exist in the save. It does not add new
 morph names to the map.
+
+Skill editing uses:
+
+- `Player.sav` for run/build/bow and jump-related values.
+- `TPS_BaseSaveGame.sav` for the saved parasite skill-level map.
 
 ## Editable Values
 
@@ -85,6 +91,25 @@ Set individual values:
 Start_BodyMorpher.cmd --set savegame_5 --body-weight 0.5 --breast-size 1.2 --hip-size 0.8 --yes
 ```
 
+Analyze skills:
+
+```text
+Start_BodyMorpher.cmd --analyze-skills savegame_5
+```
+
+Set all known integer skill levels:
+
+```text
+Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
+```
+
+Set individual skills and skill-like stats:
+
+```text
+Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --jump-height 450 --jump-progress 10 --yes
+```
+
 Restore a backup:
 
 ```text
@@ -133,6 +158,59 @@ Morph values behaved differently in local testing:
 
 These are examples and recommendations only. BodyMorpher intentionally does not
 block higher or lower values because this is a testing tool.
+
+Skill values:
+
+```text
+RunLevel, build level, bow level, and parasite skill levels are integers.
+Local saves show many skill levels in the 1..9 range.
+Level 10 is a plausible cap, but BodyMorpher does not enforce it.
+```
+
+No explicit `JumpLevel` integer was found in the tested saves. Jump is exposed
+as `JumpHeight`, `jump-progress`, and `jump-threshold` instead.
+
+## Skill Editing
+
+Player skill/stat values:
+
+```text
+--run-level          RunLevel
+--build-level        LevelBuild_85_C5CC534B4DE8ACD0DFB400919501337B
+--bow-level          LevelBow_70_5BB2DAE64F0E7B2713C401B56A36648A
+--jump-height        JumpHeight_42_3A76B27848DF699A715929986FA4A3D4
+--jump-progress      CurrentJ_39_94D3C41E4B72767B054707ABAD91EDD2
+--jump-threshold     ExponentiallyJ_40_E1F3667C4D3CAA88B508CFB5A7DE0E76
+--run-power          RunPower_44_7FF736B54F69EDF04D2F579469713BEE
+--build-progress     CurrentBuild_90_6D9646C141AE3D15E132B883BABFAFF7
+--build-threshold    ExponentiallyBuild_91_9ECB053549AB51E61FF1E4A510071DB8
+```
+
+Parasite skill levels:
+
+```text
+--sharp-vision
+--regeneration
+--thick-blood
+--oak-leather
+--strong-bones
+--titanium-back
+--absorption
+--radiation-removal
+--radiation-resistance
+--slow-metabolism
+--camel
+--frost-resistance
+--heat-resistance
+--stone-skin
+--strong-immunity
+--telekinesis
+--wings
+--intuition
+--mentality
+--stamina-wings
+--possession
+```
 
 ## Backups
 

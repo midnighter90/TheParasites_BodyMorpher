@@ -4,7 +4,7 @@ Release date: 2026-05-25
 Prepared for: The Parasites TP_Alpha_v_0.1.5.0.0
 Platform: Windows
 Runtime: Portable Node.js included
-Purpose: Offline body value save editor
+Purpose: Offline body and skill value save editor
 
 This package is provided as-is, without warranty, support obligation, or future
 update guarantee. See COPYRIGHT_AND_TERMS.txt.
