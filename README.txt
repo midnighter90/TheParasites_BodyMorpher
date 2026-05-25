@@ -5,13 +5,14 @@ What this tool does
 -------------------
 BodyMorpher is an offline save tool for savegame_* slots.
 
-It edits existing character body values in Player.sav and skill values in
-Player.sav plus TPS_BaseSaveGame.sav. The tool creates a full backup before
-every write, repacks the save as an Unreal/Oodle-Kraken chunk file, and
-verifies the written file by decoding it again.
+It edits existing character body values in Player.sav, character skill values
+in Player.sav, Entities in Player.sav, and Totem/parasite skill values in
+TPS_BaseSaveGame.sav. The tool creates a full backup before every write,
+repacks the save as an Unreal/Oodle-Kraken chunk file, and verifies the written
+file by decoding it again.
 
 The tool only edits values that already exist in the save. It does not add new
-morph names to the map.
+morph names or new Totem skill names to save maps.
 
 Important warning
 -----------------
@@ -64,14 +65,15 @@ Analyze skills:
 
   Start_BodyMorpher.cmd --analyze-skills savegame_5
 
-Set all known integer skill levels:
+Set all known skill levels and level-like values:
 
   Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
 
 Set individual skills:
 
-  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes
-  Start_BodyMorpher.cmd --set-skills savegame_5 --jump-height 450 --jump-progress 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --owl 10 --yes
 
 Restore a backup:
 
@@ -126,21 +128,33 @@ block higher or lower values because this is a testing tool.
 
 Skill guidance
 --------------
-RunLevel, build level, bow level, and parasite skill levels are saved as
-integers. Local saves show many skill levels in the 1..9 range. Level 10 is a
-plausible cap, but BodyMorpher does not enforce it.
+Run, Jump, Unarmed, Axes, Bows, Pickaxes, Wood Cutting, Build, Control, and
+Merger values were found in tested saves. Some values are true integer levels,
+while others are double precision current or progress values. Local saves show
+many skill values in the 1..9 range. Level 10 is a plausible cap, but
+BodyMorpher does not enforce it.
 
-No explicit JumpLevel integer was found in the tested saves. Jump is exposed as:
+No explicit Small Arms save value was found in the tested saves. No explicit
+JumpLevel integer was found either. Jump is exposed as:
 
   --jump-height
-  --jump-progress
+  --jump-level
   --jump-threshold
+
+Totem values:
+
+  --entities edits the saved Entity currency.
+  Totem parasite abilities are editable when they already exist in the saved
+  TPS_BaseSaveGame.sav skill map. One-shot Totem actions, item purchases, and
+  weather changes were not found as persistent editable skill values in tested
+  saves.
 
 Useful skill examples:
 
   Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
-  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --bow-level 10 --yes
-  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --regeneration 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --unarmed-level 10 --axe-level 10 --pickaxe-level 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --regeneration 10 --owl 10 --yes
 
 Custom save path
 ----------------

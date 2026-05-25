@@ -23,12 +23,13 @@ before every write, patches selected existing `DoubleProperty` and
 decoding it again.
 
 The tool only edits values that already exist in the save. It does not add new
-morph names to the map.
+morph names or new Totem skill names to save maps.
 
-Skill editing uses:
+Skill and Totem editing uses:
 
-- `Player.sav` for run/build/bow and jump-related values.
-- `TPS_BaseSaveGame.sav` for the saved parasite skill-level map.
+- `Player.sav` for character skill values, level-like progress values, and
+  Entities.
+- `TPS_BaseSaveGame.sav` for the saved Totem/parasite skill-level map.
 
 ## Editable Values
 
@@ -97,7 +98,7 @@ Analyze skills:
 Start_BodyMorpher.cmd --analyze-skills savegame_5
 ```
 
-Set all known integer skill levels:
+Set all known skill levels and level-like values:
 
 ```text
 Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
@@ -106,8 +107,9 @@ Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
 Set individual skills and skill-like stats:
 
 ```text
-Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes
-Start_BodyMorpher.cmd --set-skills savegame_5 --jump-height 450 --jump-progress 10 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --owl 10 --yes
 ```
 
 Restore a backup:
@@ -162,13 +164,27 @@ block higher or lower values because this is a testing tool.
 Skill values:
 
 ```text
-RunLevel, build level, bow level, and parasite skill levels are integers.
-Local saves show many skill levels in the 1..9 range.
+Run, Jump, Unarmed, Axes, Bows, Pickaxes, Wood Cutting, Build, Control, and
+Merger values were found in tested saves.
+Some values are true integer levels, while others are double precision current
+or progress values.
+Local saves show many skill values in the 1..9 range.
 Level 10 is a plausible cap, but BodyMorpher does not enforce it.
 ```
 
-No explicit `JumpLevel` integer was found in the tested saves. Jump is exposed
-as `JumpHeight`, `jump-progress`, and `jump-threshold` instead.
+No explicit `Small Arms` save value was found in the tested saves. No explicit
+`JumpLevel` integer was found either; jump is exposed as `jump-level`
+(`CurrentJ`), `jump-height`, and `jump-threshold`.
+
+Totem values:
+
+```text
+Entities are editable with --entities.
+Totem parasite abilities are editable when they already exist in the saved
+TPS_BaseSaveGame.sav skill map.
+One-shot Totem actions, item purchases, and weather changes were not found as
+persistent editable skill values in tested saves.
+```
 
 ## Skill Editing
 
@@ -176,14 +192,37 @@ Player skill/stat values:
 
 ```text
 --run-level          RunLevel
---build-level        LevelBuild_85_C5CC534B4DE8ACD0DFB400919501337B
---bow-level          LevelBow_70_5BB2DAE64F0E7B2713C401B56A36648A
---jump-height        JumpHeight_42_3A76B27848DF699A715929986FA4A3D4
---jump-progress      CurrentJ_39_94D3C41E4B72767B054707ABAD91EDD2
---jump-threshold     ExponentiallyJ_40_E1F3667C4D3CAA88B508CFB5A7DE0E76
+--run-progress       CurrentR_48_E44DEDF2481BFE30D93608AF0829FB89
+--run-threshold      ExponentiallyR_46_F285A159483D01385436A2B48DC384F5
 --run-power          RunPower_44_7FF736B54F69EDF04D2F579469713BEE
+--jump-level         CurrentJ_39_94D3C41E4B72767B054707ABAD91EDD2
+--jump-height        JumpHeight_42_3A76B27848DF699A715929986FA4A3D4
+--jump-threshold     ExponentiallyJ_40_E1F3667C4D3CAA88B508CFB5A7DE0E76
+--unarmed-level      CurrentUA_35_A9C1EE354C2568D006E0C59DEA7FE304
+--unarmed-threshold  ExponentiallyUA_34_6BABD40748C06C5DD28E649AC625F9E8
+--unarmed-damage     DamageUA_36_C74A12734E8F1F2132613DA21049E950
+--axe-level          CurrentAxe_57_DF69A36F480CCD396B01739F9D28FD08
+--axe-threshold      ExponentiallyAxe_56_0EE9A8B640428E46720B4EB9D34F29B6
+--axe-damage         DamageAxe_55_355AE3574379005F33ED3196F43B028C
+--bow-level          LevelBow_70_5BB2DAE64F0E7B2713C401B56A36648A
+--bow-progress       CurrentBow_66_745E110344F826BC9FEEA1B855065D7B
+--bow-threshold      ExponentiallyBow_65_94ED206948F150B46DF4739489A5D90F
+--pickaxe-level      CurrentPickaxe_80_7C3D4BDF4B7C299B74F61C95984E8073
+--pickaxe-threshold  ExponentiallyPickaxe_79_4E70EE0B434987BF12D3DEAC406235EF
+--pickaxe-damage     DamagePickaxe_78_6E18BE334EBF475948643CB1B7D075B5
+--wood-cutting-level CurrentWC_37_EE93AEA54AF3000E4C3642A6224308EC
+--wood-cutting-threshold ExponentiallyWC_38_8AEF62F341EB8EEB428F54932D5FE98B
+--wood-cutting-strength ChoppingStrength_25_D1725348456D1BE1130DA6892717D852
+--build-level        LevelBuild_85_C5CC534B4DE8ACD0DFB400919501337B
 --build-progress     CurrentBuild_90_6D9646C141AE3D15E132B883BABFAFF7
 --build-threshold    ExponentiallyBuild_91_9ECB053549AB51E61FF1E4A510071DB8
+--control-level      Control_TP_LVL_94_32D83B9A4AD65A3513193AB60757A446
+--control-progress   Current_C_TP_LVL_99_CED1D88F4D52152DAFC762A94D5BD318
+--control-threshold  Exponentially_C_TP_LVL_97_EDCD4BC04F00359A7BD4A7A60838A153
+--merger-level       Merger_TP_LVL_102_555521D94CFCE4BF23C19E9AFF29CE0B
+--merger-progress    Current_M_TP_LVL_106_57F84FAF489866A9AAF4C79BEE70DABC
+--merger-threshold   Exponentially_M_TP_LVL_104_FF9B807D4692F5C712165683D57BBE79
+--entities           Entities_12_2513650B4E423EB94AA00DAA64EA9B8F
 ```
 
 Parasite skill levels:
@@ -200,6 +239,7 @@ Parasite skill levels:
 --radiation-resistance
 --slow-metabolism
 --camel
+--owl
 --frost-resistance
 --heat-resistance
 --stone-skin

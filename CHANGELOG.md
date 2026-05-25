@@ -11,10 +11,11 @@ Initial public portable release.
 - `Player.sav` Unreal/Oodle-Kraken decode and encode support.
 - Editing for existing `BodyWeight`, `ChestSize`, and known `OldFatMorpth`
   body morph values.
-- Skill analysis and editing for `RunLevel`, build level, bow level, jump
-  stats, and the saved parasite skill-level map.
+- Skill analysis and editing for discovered character skills in `Player.sav`,
+  Entities, and the saved Totem/parasite skill-level map.
 - CLI commands for all values, morph-only values, and individual values.
-- CLI commands for all known integer skill levels and individual skill values.
+- CLI commands for all known skill level or level-like values and individual
+  skill values.
 - Interactive menu.
 - Full slot backups before write and restore operations.
 - Restore command for BodyMorpher-created backups.

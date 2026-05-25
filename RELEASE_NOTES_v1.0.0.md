@@ -31,7 +31,8 @@ Start_BodyMorpher.cmd --set-morphs savegame_5 2.0 --yes
 Start_BodyMorpher.cmd --set savegame_5 --body-weight 0.5 --breast-size 1.2 --hip-size 0.8 --yes
 Start_BodyMorpher.cmd --analyze-skills savegame_5
 Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
-Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
+Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes
 ```
 
 ## Purpose
@@ -39,8 +40,8 @@ Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --
 Edits existing `Player.sav` body values for testing and repairing character
 body state when the game does not provide a later in-game correction path.
 
-Also edits discovered skill values in `Player.sav` and the parasite
-skill-level map in `TPS_BaseSaveGame.sav`.
+Also edits discovered skill values in `Player.sav`, Entities in `Player.sav`,
+and the Totem/parasite skill-level map in `TPS_BaseSaveGame.sav`.
 
 ## Value Notes
 
@@ -56,13 +57,19 @@ The game was observed to clamp `BodyWeight` and `ChestSize` back to `0..1`
 when saving. Morph values above `1.0` survived local save/load tests, but
 extreme values can look distorted.
 
-Skill values:
+Skill and Totem values:
 
 ```text
-RunLevel, build level, bow level, and parasite skills are saved as integers.
+Run, Jump, Unarmed, Axes, Bows, Pickaxes, Wood Cutting, Build, Control, and
+Merger values were found in tested saves.
+Some are true integer levels and some are double precision current/progress
+values.
+Entities are editable.
+Totem parasite abilities are editable when they already exist in the saved
+skill map.
 Level 10 is a plausible cap based on local testing, but not enforced.
-No explicit JumpLevel integer was found; jump is exposed as jump height and
-jump progress/threshold stats.
+No explicit Small Arms value was found. No explicit JumpLevel integer was
+found; jump is exposed as jump-level/current, jump height, and jump threshold.
 ```
 
 ## Target Version

@@ -25,7 +25,9 @@ Useful commands:
   Start_BodyMorpher.cmd --set savegame_5 --body-weight 0.5 --breast-size 1.2 --yes
   Start_BodyMorpher.cmd --analyze-skills savegame_5
   Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes
-  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes
+  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --owl 10 --yes
   Start_BodyMorpher.cmd --restore <backup-folder-name> --yes
 
 BodyWeight kg examples from local testing:
@@ -38,10 +40,14 @@ The game was observed to clamp BodyWeight and ChestSize back to 0..1 when
 saving. Morph values above 1.0 can survive an in-game save, but extreme values
 can look distorted. BodyMorpher does not limit your input.
 
-Skill values are also editable. Local saves show many skill levels in the
-1..9 range. Level 10 is a plausible cap, but BodyMorpher does not limit your
-input. No explicit JumpLevel integer was found; jump is exposed as jump height
-and jump progress/threshold values.
+Skill values are also editable. Local saves show Run, Jump, Unarmed, Axes,
+Bows, Pickaxes, Wood Cutting, Build, Control, Merger, Entities, and saved
+Totem/parasite skill values. Some are true integer levels and some are
+double precision current/progress values. Local saves show many skill values in
+the 1..9 range. Level 10 is a plausible cap, but BodyMorpher does not limit
+your input. No explicit Small Arms value was found. No explicit JumpLevel
+integer was found; jump is exposed as jump-level/current, jump height, and jump
+threshold values.
 
 Use this tool at your own risk. There is no warranty, no support obligation,
 and no guarantee of compatibility with future game versions.

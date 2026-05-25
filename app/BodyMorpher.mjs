@@ -54,14 +54,47 @@ const MORPH_VALUES = [
 
 const PLAYER_SKILL_VALUES = [
   { key: "run-level", property: "RunLevel", label: "Run level", type: "int", level: true },
-  { key: "build-level", property: "LevelBuild_85_C5CC534B4DE8ACD0DFB400919501337B", label: "Build level", type: "int", level: true },
-  { key: "bow-level", property: "LevelBow_70_5BB2DAE64F0E7B2713C401B56A36648A", label: "Bow level", type: "int", level: true },
-  { key: "jump-height", property: "JumpHeight_42_3A76B27848DF699A715929986FA4A3D4", label: "Jump height", type: "double", level: false },
-  { key: "jump-progress", property: "CurrentJ_39_94D3C41E4B72767B054707ABAD91EDD2", label: "Jump progress", type: "double", level: false },
-  { key: "jump-threshold", property: "ExponentiallyJ_40_E1F3667C4D3CAA88B508CFB5A7DE0E76", label: "Jump threshold", type: "double", level: false },
+  { key: "run-progress", property: "CurrentR_48_E44DEDF2481BFE30D93608AF0829FB89", label: "Run progress", type: "double", level: false },
+  { key: "run-threshold", property: "ExponentiallyR_46_F285A159483D01385436A2B48DC384F5", label: "Run threshold", type: "double", level: false },
   { key: "run-power", property: "RunPower_44_7FF736B54F69EDF04D2F579469713BEE", label: "Run power", type: "double", level: false },
+
+  { key: "jump-level", aliases: ["jump-progress"], property: "CurrentJ_39_94D3C41E4B72767B054707ABAD91EDD2", label: "Jump current", type: "double", level: true },
+  { key: "jump-height", property: "JumpHeight_42_3A76B27848DF699A715929986FA4A3D4", label: "Jump height", type: "double", level: false },
+  { key: "jump-threshold", property: "ExponentiallyJ_40_E1F3667C4D3CAA88B508CFB5A7DE0E76", label: "Jump threshold", type: "double", level: false },
+
+  { key: "unarmed-level", aliases: ["unarmed-progress"], property: "CurrentUA_35_A9C1EE354C2568D006E0C59DEA7FE304", label: "Unarmed current", type: "double", level: true },
+  { key: "unarmed-threshold", property: "ExponentiallyUA_34_6BABD40748C06C5DD28E649AC625F9E8", label: "Unarmed threshold", type: "double", level: false },
+  { key: "unarmed-damage", property: "DamageUA_36_C74A12734E8F1F2132613DA21049E950", label: "Unarmed damage", type: "double", level: false },
+
+  { key: "axe-level", aliases: ["axe-progress"], property: "CurrentAxe_57_DF69A36F480CCD396B01739F9D28FD08", label: "Axe current", type: "double", level: true },
+  { key: "axe-threshold", property: "ExponentiallyAxe_56_0EE9A8B640428E46720B4EB9D34F29B6", label: "Axe threshold", type: "double", level: false },
+  { key: "axe-damage", property: "DamageAxe_55_355AE3574379005F33ED3196F43B028C", label: "Axe damage", type: "double", level: false },
+
+  { key: "bow-level", property: "LevelBow_70_5BB2DAE64F0E7B2713C401B56A36648A", label: "Bow level", type: "int", level: true },
+  { key: "bow-progress", property: "CurrentBow_66_745E110344F826BC9FEEA1B855065D7B", label: "Bow progress", type: "double", level: false },
+  { key: "bow-threshold", property: "ExponentiallyBow_65_94ED206948F150B46DF4739489A5D90F", label: "Bow threshold", type: "double", level: false },
+
+  { key: "pickaxe-level", aliases: ["pickaxe-progress"], property: "CurrentPickaxe_80_7C3D4BDF4B7C299B74F61C95984E8073", label: "Pickaxe current", type: "double", level: true },
+  { key: "pickaxe-threshold", property: "ExponentiallyPickaxe_79_4E70EE0B434987BF12D3DEAC406235EF", label: "Pickaxe threshold", type: "double", level: false },
+  { key: "pickaxe-damage", property: "DamagePickaxe_78_6E18BE334EBF475948643CB1B7D075B5", label: "Pickaxe damage", type: "double", level: false },
+
+  { key: "wood-cutting-level", aliases: ["woodcutting-level", "wood-cutting-progress", "woodcutting-progress"], property: "CurrentWC_37_EE93AEA54AF3000E4C3642A6224308EC", label: "Wood cutting current", type: "double", level: true },
+  { key: "wood-cutting-threshold", aliases: ["woodcutting-threshold"], property: "ExponentiallyWC_38_8AEF62F341EB8EEB428F54932D5FE98B", label: "Wood cutting threshold", type: "double", level: false },
+  { key: "wood-cutting-strength", aliases: ["woodcutting-strength"], property: "ChoppingStrength_25_D1725348456D1BE1130DA6892717D852", label: "Wood cutting strength", type: "double", level: false },
+
+  { key: "build-level", property: "LevelBuild_85_C5CC534B4DE8ACD0DFB400919501337B", label: "Build level", type: "int", level: true },
   { key: "build-progress", property: "CurrentBuild_90_6D9646C141AE3D15E132B883BABFAFF7", label: "Build progress", type: "double", level: false },
   { key: "build-threshold", property: "ExponentiallyBuild_91_9ECB053549AB51E61FF1E4A510071DB8", label: "Build threshold", type: "double", level: false },
+
+  { key: "control-level", property: "Control_TP_LVL_94_32D83B9A4AD65A3513193AB60757A446", label: "Control level", type: "double", level: true },
+  { key: "control-progress", property: "Current_C_TP_LVL_99_CED1D88F4D52152DAFC762A94D5BD318", label: "Control progress", type: "double", level: false },
+  { key: "control-threshold", property: "Exponentially_C_TP_LVL_97_EDCD4BC04F00359A7BD4A7A60838A153", label: "Control threshold", type: "double", level: false },
+
+  { key: "merger-level", property: "Merger_TP_LVL_102_555521D94CFCE4BF23C19E9AFF29CE0B", label: "Merger level", type: "double", level: true },
+  { key: "merger-progress", property: "Current_M_TP_LVL_106_57F84FAF489866A9AAF4C79BEE70DABC", label: "Merger progress", type: "double", level: false },
+  { key: "merger-threshold", property: "Exponentially_M_TP_LVL_104_FF9B807D4692F5C712165683D57BBE79", label: "Merger threshold", type: "double", level: false },
+
+  { key: "entities", property: "Entities_12_2513650B4E423EB94AA00DAA64EA9B8F", label: "Entities", type: "int", level: false },
 ];
 
 const PARASITE_SKILLS = [
@@ -76,6 +109,7 @@ const PARASITE_SKILLS = [
   { key: "radiation-resistance", name: "RadiationResistance" },
   { key: "slow-metabolism", name: "SlowMetabolism" },
   { key: "camel", name: "Camel" },
+  { key: "owl", name: "Owl" },
   { key: "frost-resistance", name: "FrostResistance" },
   { key: "heat-resistance", name: "HeatResistance" },
   { key: "stone-skin", name: "StoneSkin" },
@@ -91,7 +125,17 @@ const PARASITE_SKILLS = [
 const DIRECT_BY_KEY = new Map(DIRECT_VALUES.map((entry) => [entry.key, entry]));
 const MORPH_BY_KEY = new Map(MORPH_VALUES.map((entry) => [entry.key, entry]));
 const MORPH_BY_NAME = new Map(MORPH_VALUES.map((entry) => [entry.morph, entry]));
-const PLAYER_SKILL_BY_KEY = new Map(PLAYER_SKILL_VALUES.map((entry) => [entry.key, entry]));
+
+function entriesByKeyAndAlias(entries) {
+  const out = new Map();
+  for (const entry of entries) {
+    out.set(entry.key, entry);
+    for (const alias of entry.aliases || []) out.set(alias, entry);
+  }
+  return out;
+}
+
+const PLAYER_SKILL_BY_KEY = entriesByKeyAndAlias(PLAYER_SKILL_VALUES);
 const PARASITE_SKILL_BY_KEY = new Map(PARASITE_SKILLS.map((entry) => [entry.key, entry]));
 const PARASITE_SKILL_BY_NAME = new Map(PARASITE_SKILLS.map((entry) => [entry.name, entry]));
 
@@ -299,6 +343,14 @@ function readFString(buf, pos) {
   return { len, value, start: pos + 4, end: pos + 4 + bytes };
 }
 
+function tryReadFString(buf, pos) {
+  try {
+    return readFString(buf, pos);
+  } catch {
+    return null;
+  }
+}
+
 function findNameStart(buf, name, from = 0) {
   const idx = buf.indexOf(Buffer.from(`${name}\0`, "utf8"), from);
   return idx >= 0 ? idx - 4 : -1;
@@ -348,20 +400,55 @@ function writePlayerSkillValue(buf, entry, value) {
   }
 }
 
+function isPlausibleSkillName(name) {
+  return /^[A-Za-z][A-Za-z0-9_]{1,40}$/.test(name);
+}
+
+function findSkillMapPayload(buf, propPos) {
+  const prop = readFString(buf, propPos);
+  if (!prop) return null;
+  const type = readFString(buf, prop.end);
+  if (!type || type.value !== "MapProperty") return null;
+
+  const keyType = tryReadFString(buf, type.end + 4);
+  const valueType = keyType ? tryReadFString(buf, keyType.end + 4) : null;
+  const scanStart = valueType ? valueType.end : type.end + 40;
+  const scanEnd = Math.min(buf.length, type.end + 160);
+  for (let pos = scanStart; pos < scanEnd; pos += 1) {
+    const first = tryReadFString(buf, pos);
+    if (!first || !isPlausibleSkillName(first.value) || pos < 4) continue;
+    const count = buf.readInt32LE(pos - 4);
+    if (count < 0 || count > 100) continue;
+
+    let cursor = pos;
+    let valid = true;
+    for (let i = 0; i < count; i += 1) {
+      const key = tryReadFString(buf, cursor);
+      if (!key || !isPlausibleSkillName(key.value)) {
+        valid = false;
+        break;
+      }
+      cursor = key.end + 4;
+      if (cursor > buf.length) {
+        valid = false;
+        break;
+      }
+    }
+    if (valid) return { first: pos, count };
+  }
+
+  return null;
+}
+
 function parseSkillLevelMap(buf) {
   const propPos = findNameStart(buf, "Save_Current_Skill_Level_6_640A898B47AF4D2A8749C89B4E7EA387");
   if (propPos < 0) return null;
-  const first = findNameStart(buf, "SharpVision", propPos);
-  if (first < 0) return null;
-  const countOffset = first - 4;
-  const unknownOffset = first - 8;
-  if (unknownOffset < 0) throw new Error("Invalid skill map payload offset");
-  const count = buf.readInt32LE(countOffset);
-  if (count < 0 || count > 100) throw new Error(`Unexpected skill map count: ${count}`);
+  const payload = findSkillMapPayload(buf, propPos);
+  if (!payload) return { propPos, count: 0, entries: [] };
 
-  let cursor = first;
+  let cursor = payload.first;
   const entries = [];
-  for (let i = 0; i < count; i += 1) {
+  for (let i = 0; i < payload.count; i += 1) {
     const key = readFString(buf, cursor);
     cursor = key.end;
     if (cursor + 4 > buf.length) throw new Error(`Skill level for ${key.value} extends past EOF`);
@@ -371,7 +458,7 @@ function parseSkillLevelMap(buf) {
     const known = PARASITE_SKILL_BY_NAME.get(key.value);
     entries.push({ key: known?.key || key.value, name: key.value, value, offset: valueOffset });
   }
-  return { propPos, count, entries };
+  return { propPos, count: payload.count, entries };
 }
 
 function parseMorphEntries(buf) {
@@ -516,9 +603,15 @@ function printRecommendations() {
   console.log("  5.0 also survived, but looked absurd and is best treated as stress testing.");
   console.log("");
   console.log("Skill values:");
-  console.log("  RunLevel, Build level, Bow level, and parasite skill levels are saved as integers.");
-  console.log("  Local saves show skill levels in the 1..9 range; level 10 is a plausible cap, but not enforced here.");
-  console.log("  No explicit JumpLevel integer was found; jump is exposed as JumpHeight and jump progress/threshold stats.");
+  console.log("  Local saves expose Run, Jump, Unarmed, Axes, Bows, Pickaxes, Wood Cutting, Build, Control, and Merger values.");
+  console.log("  Some are true IntProperty levels, while others are DoubleProperty current/progress values.");
+  console.log("  Local saves show many skill values in the 1..9 range; level 10 is a plausible cap, but not enforced here.");
+  console.log("  No Small Arms save value was found in the tested saves.");
+  console.log("");
+  console.log("Totem values:");
+  console.log("  Entities are stored in Player.sav and can be edited with --entities.");
+  console.log("  Totem parasite abilities are stored in the TPS_BaseSaveGame.sav skill map when already present.");
+  console.log("  One-shot Totem actions/items/weather changes were not found as persistent editable skill values.");
   console.log("");
   console.log("BodyMorpher does not clamp your input. Any finite number is accepted.");
   console.log("You are responsible for choosing values and checking the result in-game.");
@@ -1018,7 +1111,7 @@ async function menu() {
     } else if (choice === "7") {
       const slot = await chooseSlot();
       if (!slot) continue;
-      const value = parseIntValue(await ask("Integer skill level for run/build/bow and parasite skills: "), "skill level");
+      const value = parseIntValue(await ask("Integer level for known skill and Totem ability values: "), "skill level");
       await writeSkills(slot, plannedSkillChangesFromAll(value), false);
     } else if (choice === "8") {
       await restoreBackup();
@@ -1043,8 +1136,9 @@ function printHelp() {
   console.log("  Start_BodyMorpher.cmd --set-morphs savegame_5 2.0 --yes");
   console.log("  Start_BodyMorpher.cmd --set savegame_5 --body-weight 0.5 --breast-size 1.2 --hip-size 0.8 --yes");
   console.log("  Start_BodyMorpher.cmd --set-all-skills savegame_5 10 --yes");
-  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --build-level 10 --sharp-vision 10 --yes");
-  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --jump-height 450 --jump-progress 10 --yes");
+  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --run-level 10 --jump-level 10 --build-level 10 --yes");
+  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 10 --entities 5000 --yes");
+  console.log("  Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 10 --owl 10 --yes");
   console.log("  Start_BodyMorpher.cmd --restore <backup-folder-name> --yes");
   console.log("");
   console.log("Editable values:");
@@ -1070,8 +1164,8 @@ function printHelp() {
   console.log("  --all-morphs <value> Sets only known morph values.");
   console.log("");
   console.log("Bulk options for --set-skills:");
-  console.log("  --all <level>                 Sets run/build/bow and known parasite skill levels.");
-  console.log("  --all-player-levels <level>   Sets run/build/bow levels only.");
+  console.log("  --all <level>                 Sets known level and level-like skill values.");
+  console.log("  --all-player-levels <level>   Sets known player skill level/current values only.");
   console.log("  --all-parasite-skills <level> Sets known parasite skill levels only.");
   console.log("");
   console.log("Optional: set TP_SAVE_ROOT if your saves are not in the default path.");
