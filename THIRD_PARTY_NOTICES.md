@@ -40,7 +40,6 @@ chunk compatibility:
 
 ```text
 runtime\node_modules\oodle.js\bin\oodle-x64.dll
-runtime\node_modules\oodle.js\oodle.js\bin\oodle-x64.dll
 ```
 
 Oodle and related names belong to their respective owners. No ownership is
