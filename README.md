@@ -12,6 +12,24 @@ Prepared for:
 
 No compatibility is promised for other game versions.
 
+## Download
+
+Download the ready-to-run release ZIP from GitHub Releases:
+
+```text
+https://github.com/midnighter90/TheParasites_BodyMorpher/releases/tag/v1.0.0
+```
+
+Use the attached file:
+
+```text
+TheParasites_BodyMorpher_v1.0.0.zip
+```
+
+Do not use GitHub's automatically generated "Source code" ZIP as the main
+download. The release ZIP is the tested portable package with the included
+runtime, documentation, manifest, and launcher.
+
 ## What It Does
 
 BodyMorpher edits existing character body and skill values in `savegame_*`

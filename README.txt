@@ -14,6 +14,20 @@ file by decoding it again.
 The tool only edits values that already exist in the save. It does not add new
 morph names or new Totem skill names to save maps.
 
+Download
+--------
+Download the ready-to-run release ZIP from GitHub Releases:
+
+  https://github.com/midnighter90/TheParasites_BodyMorpher/releases/tag/v1.0.0
+
+Use the attached file:
+
+  TheParasites_BodyMorpher_v1.0.0.zip
+
+Do not use GitHub's automatically generated "Source code" ZIP as the main
+download. The release ZIP is the tested portable package with the included
+runtime, documentation, manifest, and launcher.
+
 Important warning
 -----------------
 Use this tool at your own risk. Back up your saves before using any save tool.
