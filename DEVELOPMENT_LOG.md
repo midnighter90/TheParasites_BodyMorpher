@@ -1,52 +1,52 @@
 # Development Log - The Parasites BodyMorpher
 
-Stand: 2026-05-25
+Status date: 2026-05-25
 
-Diese Datei dokumentiert die relevanten Schritte, mit denen BodyMorpher
-entwickelt, getestet, erweitert, verpackt und fuer die Veroeffentlichung
-vorbereitet wurde.
+This file documents the relevant research, trial-and-error work,
+implementation decisions, packaging steps, and release checks that led to the
+BodyMorpher v1.0.0 release.
 
-## Ausgangspunkt
+## Starting Point
 
-BodyMorpher entstand aus der Frage, ob Charakterwerte im Savegame nachtraeglich
-angepasst werden koennen. Der erste konkrete Anwendungsfall war die Korrektur
-von Koerperformen und Gewicht, weil The Parasites im Spiel selbst keine einfache
-nachtraegliche Korrektur fuer bestimmte Charakterwerte anbietet.
+BodyMorpher began as an offline save editor for character body values in The
+Parasites. The immediate goal was to correct body state after character
+creation or later gameplay changes, because the tested game build did not
+provide an in-game correction path for every relevant value.
 
-Spaeter wurde der Scope erweitert:
+The scope later expanded to include:
 
-- Koerperwerte.
-- Morphwerte.
-- Charakter-Skills.
-- Totem-/Parasiten-Skills.
-- Entity-Waehrung.
+- direct body values
+- morph map values
+- character skill values
+- Totem/parasite skill levels
+- Entity currency
 
-## Recherche
+## Save Research
 
-1. Savegame-Orte untersucht:
-   - Slots liegen unter `%LOCALAPPDATA%\TheParasites\Saved\SaveGames`.
-   - relevante Dateien:
+1. Save slot layout was inspected.
+   - Save slots are stored below the standard The Parasites local save folder.
+   - The relevant files for this tool are:
      - `Player.sav`
      - `TPS_BaseSaveGame.sav`
 
-2. Save-Kompression analysiert:
-   - The Parasites nutzt Unreal/Oodle-Kraken-komprimierte Save-Chunks.
-   - Das gleiche portable Decode-/Encode-Prinzip wie bei CorpseReaper wurde
-     verwendet:
-     - Chunk-Magic `0x9e2a83c1`.
-     - Header-Marker `0x22222222`.
-     - Headergroesse 49 Bytes.
-     - Oodle/Kraken Algorithmus.
-     - Chunkgroesse bis `0x20000`.
+2. Save compression was analyzed.
+   - The Parasites uses Unreal/Oodle-Kraken compressed save chunks.
+   - The same portable decode/encode approach used by the companion save tools
+     was reused here:
+     - chunk magic `0x9e2a83c1`
+     - header marker `0x22222222`
+     - header size 49 bytes
+     - Oodle/Kraken compression
+     - chunk size up to `0x20000`
 
-3. Unreal-Property-Struktur in `Player.sav` untersucht:
-   - `DoubleProperty` fuer viele Koerper-, Morph- und Fortschrittswerte.
-   - `IntProperty` fuer einige echte Levelwerte.
-   - FStrings fuer Property-Namen und Map-Schluessel.
+3. The Unreal property layout in `Player.sav` was inspected.
+   - Many body, morph, and progress values are stored as `DoubleProperty`.
+   - Some true level values are stored as `IntProperty`.
+   - Property names and map keys are stored as Unreal-style strings.
 
-4. Morph-Map gesucht:
-   - relevante Morphwerte stehen in einer `OldFatMorpth`-artigen Map.
-   - Die Map enthaelt Namen wie:
+4. The morph map was located.
+   - Relevant morph values are stored in an `OldFatMorpth`-style map.
+   - Observed morph names include:
      - `SS Belly Shape Fat 1`
      - `SS Thigh Inflate`
      - `SS_Thigh_Inflate`
@@ -57,18 +57,18 @@ Spaeter wurde der Scope erweitert:
      - `BC Breast Size`
      - `BC Breast Sag1`
 
-## Trial and Error - Koerperwerte
+## Body Value Trials
 
-1. Werte in bestehenden Saves gelesen.
-   - `BodyWeight` und `ChestSize` wurden als direkte `DoubleProperty`-Werte
-     gefunden.
-   - Morphwerte wurden separat in der Morph-Map gefunden.
+1. Existing saves were read first.
+   - `BodyWeight` and `ChestSize` were found as direct `DoubleProperty`
+     values.
+   - Morph values were found separately in the morph map.
 
-2. Gewichtsskala getestet.
-   - Ingame wurde ein Gewicht von ca. 56 kg beobachtet.
-   - `BodyWeight = 0.95` ergab ca. 58 kg.
-   - `BodyWeight = 1.5` ergab nach Ingame-Speichern ca. 59 kg.
-   - daraus wurde abgeleitet:
+2. The body weight scale was tested.
+   - A visible in-game weight near 56 kg was used as the first reference.
+   - `BodyWeight = 0.95` resulted in roughly 58 kg.
+   - `BodyWeight = 1.5` was saved back by the game at roughly 59 kg.
+   - The working estimate became:
 
 ```text
 BodyWeight 0.0 ~= 46 kg
@@ -76,57 +76,57 @@ BodyWeight 1.0 ~= 59 kg
 kg ~= 46 + BodyWeight * 13
 ```
 
-3. Clamp-Verhalten beobachtet.
-   - `BodyWeight` und `ChestSize` wurden vom Spiel beim Speichern auf den
-     Bereich `0..1` zurueckgeklemmt.
-   - Morphwerte verhielten sich anders.
+3. Game-side clamp behavior was observed.
+   - The game was observed to clamp `BodyWeight` and `ChestSize` back into the
+     `0..1` range when saving.
+   - Morph values behaved differently.
 
-4. Morphwerte getestet.
-   - alle bekannten Morphwerte auf `1.0` gesetzt.
-   - danach alle auf `0`.
-   - danach alle auf `2.0`.
-   - danach alle nicht zurueckgesetzten Werte auf `5`.
-   - Ergebnis:
-     - `2.0` ueberlebte das Ingame-Speichern.
-     - `5.0` ueberlebte ebenfalls, sah aber sichtbar absurd/extrem aus.
-   - Daraus entstanden Empfehlungen, aber keine harte Begrenzung fuer Morphs.
+4. Morph values were stress-tested.
+   - Known morph values were set to `1.0`.
+   - Then they were set to `0`.
+   - Then they were set to `2.0`.
+   - Values that did not reset were then tested at `5.0`.
+   - Result:
+     - `2.0` survived an in-game save.
+     - `5.0` also survived, but produced extremely distorted results.
+   - This led to recommendations rather than hard limits for morph values.
 
-## Finaler Code - Koerpereditor
+## Body Editor Implementation
 
-Der Koerperteil des Editors liegt in:
+The main implementation lives in:
 
 ```text
 app/BodyMorpher.mjs
 ```
 
-Wichtige Bestandteile:
+Important implementation pieces:
 
-- Oodle/Kraken Decode und Encode.
-- Slot-Listing fuer `savegame_*`.
-- Analyse von `Player.sav`.
-- Lesen und Schreiben von:
+- Oodle/Kraken decode and encode
+- save slot listing for `savegame_*`
+- `Player.sav` analysis
+- reading and writing:
   - `BodyWeight`
   - `ChestSize`
-  - bekannten Morphwerten.
+  - known morph values
 - `--set-all`
 - `--set-morphs`
-- `--set` fuer einzelne Werte.
-- interaktives Menue.
-- automatische Backups vor jedem Write.
-- Restore-Funktion.
-- Verifikation nach dem Schreiben durch erneutes Decoden.
+- `--set` for individual values
+- interactive menu
+- automatic backup before every write
+- restore command
+- post-write verification by decoding the written file again
 
-`BodyWeight` wird ueberall mit geschaetztem kg-Wert angezeigt:
+`BodyWeight` is displayed with an estimated kg value in:
 
-- in `--analyze`.
-- in der interaktiven Einzelwert-Eingabe.
-- in der geplanten Aenderung vor dem Schreiben.
+- `--analyze`
+- the interactive individual-value editor
+- the planned-change summary before writing
 
-## Recherche - Skills
+## Skill Research
 
-Nach dem Koerpereditor wurde untersucht, ob Skillwerte ebenfalls im Save liegen.
+After the body editor worked, saves were inspected for character skill values.
 
-Gefunden in `Player.sav`:
+Observed `Player.sav` fields:
 
 - Run:
   - `RunLevel`
@@ -172,25 +172,25 @@ Gefunden in `Player.sav`:
 - Entities:
   - `Entities_12_2513650B4E423EB94AA00DAA64EA9B8F`
 
-Nicht gefunden:
+Not observed in the tested saves:
 
-- kein explizites `JumpLevel` als eigener Integer.
-- kein persistenter `Small Arms`-Savewert in den getesteten Saves.
+- no separate `JumpLevel` integer field
+- no persistent `Small Arms` save value
 
-## Recherche - Totem und Wiki-Abgleich
+## Totem Research
 
-Die Wiki-Seiten wurden zur fachlichen Einordnung genutzt:
+The following public wiki pages were used for domain checks:
 
 - `https://theparasites.wiki.gg/wiki/Skills`
 - `https://theparasites.wiki.gg/wiki/Totem`
 
-In `TPS_BaseSaveGame.sav` wurde eine Map gefunden:
+The following map was found in `TPS_BaseSaveGame.sav`:
 
 ```text
 Save_Current_Skill_Level_6_640A898B47AF4D2A8749C89B4E7EA387
 ```
 
-Diese Map enthaelt Totem-/Parasiten-Skills, z.B.:
+The map contains Totem/parasite skill keys, for example:
 
 - `SharpVision`
 - `Regeneration`
@@ -215,18 +215,15 @@ Diese Map enthaelt Totem-/Parasiten-Skills, z.B.:
 - `StaminaWings`
 - `Possession`
 
-Trial-and-error-Korrektur:
+The first implementation treated Totem values as freely scalable levels. That
+was corrected after checking the wiki's `Cost` column:
 
-- Anfangs wurden Totem-Werte wie freie Level behandelt.
-- Das war falsch fuer Skills mit nur einmaliger `Cost` im Totem-Wiki.
-- Die `Cost`-Spalte definiert die Stufen:
-  - ein Cost-Eintrag = einmaliger Unlock, max 1.
-  - mehrere Cost-Eintraege = entsprechend viele Stufen.
-- Danach wurden bekannte Totem-Skills mit Max-Leveln versehen.
-- Direkte Eingaben ueber dem Max-Level werden abgewiesen.
-- Bulk `--set-all-skills 10` kappt Totem-Skills auf ihr jeweiliges Maximum.
+- one `Cost` entry means a one-time unlock with max level 1
+- multiple `Cost` entries mean that many levels
+- direct inputs above the known max level are rejected
+- bulk `--set-all-skills 10` caps each known Totem skill to its own maximum
 
-Beispiele:
+Examples:
 
 ```text
 --sharp-vision 1
@@ -234,9 +231,9 @@ Beispiele:
 --owl 6
 ```
 
-## Finaler Code - Skill- und Totemeditor
+## Skill and Totem Editor Implementation
 
-Ergaenzte CLI-Kommandos:
+Added CLI commands include:
 
 ```text
 Start_BodyMorpher.cmd --analyze-skills savegame_5
@@ -246,18 +243,18 @@ Start_BodyMorpher.cmd --set-skills savegame_5 --control-level 10 --merger-level 
 Start_BodyMorpher.cmd --set-skills savegame_5 --sharp-vision 1 --owl 6 --yes
 ```
 
-Wichtige Implementierungsentscheidungen:
+Important behavior decisions:
 
-- Der Editor schreibt nur vorhandene Save-Felder.
-- Er fuegt keine neuen Morphnamen und keine neuen Totem-Skillnamen in Maps ein.
-- Fehlende Skills werden uebersprungen statt kuenstlich erzeugt.
-- Player-Skillwerte werden nicht hart gecappt, weil viele als
-  Current-/Progress-DoubleProperty gespeichert sind.
-- Totem-Skills werden gemaess Wiki-Stufenzahl gecappt.
+- The editor only writes fields that already exist in the save.
+- It does not insert new morph names or new Totem skill names into maps.
+- Missing skills are skipped instead of being synthesized.
+- Character skill-like values are not hard-capped because many are stored as
+  current/progress `DoubleProperty` values.
+- Totem skills are capped according to the known wiki level counts.
 
-## Dokumentation und Repository-Aufbau
+## Documentation and Repository Layout
 
-BodyMorpher wurde im Stil der anderen The-Parasites-Projekte aufgebaut:
+The public package was prepared with:
 
 - `README.md`
 - `README.txt`
@@ -273,66 +270,72 @@ BodyMorpher wurde im Stil der anderen The-Parasites-Projekte aufgebaut:
 - `THIRD_PARTY_NOTICES.txt`
 - `MANIFEST_SHA256.txt`
 - portable `runtime`
-- CMD-Launcher
+- CMD launcher
 
-Das Repository:
+No personal local paths, save contents, or private machine-specific locations
+are required by the public package.
 
-```text
-https://github.com/midnighter90/TheParasites_BodyMorpher
-```
+## License and Copyright Work
 
-## Lizenz- und Copyright-Arbeit
+The release uses the same custom restricted source-available terms as the other
+companion tools:
 
-Wie bei den anderen Projekten wurden einheitliche Terms verwendet:
+- source is available for inspection
+- personal, non-commercial use is allowed
+- personal, non-commercial modification is allowed
+- rehosting, mirroring, reposting, repackaging, and hosting on other websites
+  are prohibited
+- commercial use is prohibited
+- no warranty
+- no support obligation
+- no future compatibility guarantee
 
-- Quellcode einsehbar.
-- persoenliche, nicht-kommerzielle Nutzung erlaubt.
-- persoenliche, nicht-kommerzielle Modifikation erlaubt.
-- kein Rehosting, Mirroring, Reposting, Repackaging oder Hosting auf anderen
-  Websites.
-- keine kommerzielle Nutzung.
-- keine Garantie, kein Supportversprechen, keine Zukunftskompatibilitaet.
+The Oodle notice was aligned with the companion tools and with the
+WorkingRobot/OodleUE EULA notice wording.
 
-Die Oodle-Notiz wurde an die CorpseReaper-/OodleUE-Formulierung angeglichen.
+## GitHub and Release Work
 
-## GitHub-/Release-Arbeit
+Release preparation steps:
 
-Durchgefuehrte Schritte:
+1. Create the repository.
+2. Add the portable runtime.
+3. Build the initial v1.0.0 release ZIP.
+4. Add the skill editor.
+5. Add the Totem/wiki level mapping.
+6. Correct Totem level caps.
+7. Add prompts that show current values and estimated kg for `BodyWeight`.
+8. Rebuild `MANIFEST_SHA256.txt` after package changes.
+9. Rebuild the release ZIP after relevant changes.
+10. Push `main`.
+11. Move the `v1.0.0` tag to the final release commit.
+12. Add a GitHub release with the tested ZIP asset.
+13. Add README guidance that users should download the release ZIP, not the
+    automatically generated source archive.
 
-1. Repository erstellt und initial befuellt.
-2. portable Runtime eingebunden.
-3. v1.0.0-Release-ZIP gebaut.
-4. Skill-Editor nachtraeglich ergaenzt.
-5. Totem-/Wiki-Abgleich ergaenzt.
-6. Totem-Level-Caps korrigiert.
-7. interaktive Prompts mit aktuellen Werten und kg-Anzeige ergaenzt.
-8. `MANIFEST_SHA256.txt` nach jeder Datei-/Runtime-Aenderung neu erzeugt.
-9. Release-ZIP nach jeder relevanten Aenderung neu gebaut.
-10. `main` gepusht.
-11. `v1.0.0` jeweils auf den aktuellen finalen Stand verschoben.
+## Verification
 
-## Verifikation
+Checks performed during release preparation included:
 
-Durchgefuehrt wurden u.a.:
+- `node --check app/BodyMorpher.mjs`
+- `--help`
+- `--recommendations`
+- `--analyze`
+- `--analyze-skills`
+- write tests on temporary save copies
+- negative test: `--sharp-vision 10` must fail
+- bulk test: `--set-all-skills 10` must cap Totem skills
+- BodyWeight test with kg output
+- manifest verification
+- ZIP extraction
+- manifest verification against the extracted ZIP
+- check that `.git`, backup folders, and duplicate runtime package copies are
+  not included in the ZIP
+- Git status, remote branch, and release tag checks
 
-- `node --check app/BodyMorpher.mjs`.
-- `--help`.
-- `--recommendations`.
-- `--analyze savegame_5`.
-- `--analyze-skills savegame_1` bis `savegame_5`.
-- Schreibtests auf temporaeren Save-Kopien.
-- Negativtest: `--sharp-vision 10` muss fehlschlagen.
-- Bulk-Test: `--set-all-skills 10` muss Totem-Skills cappen.
-- BodyWeight-Test auf temporaerer Kopie mit kg-Ausgabe.
-- Manifest-Pruefung.
-- ZIP-Entpackung.
-- Manifest-Pruefung im ZIP.
-- Git-Status und Remote-Tag-Pruefung.
+## Result
 
-## Ergebnis
-
-BodyMorpher ist ein portabler Offline-Save-Editor fuer The Parasites. Er kann
-Koerperwerte, Morphwerte, gefundene Charakter-Skillwerte, Entities und
-vorhandene Totem-/Parasiten-Skills bearbeiten. Das Tool arbeitet mit Backups,
-schreibt nur vorhandene Save-Felder, prueft geschriebene Dateien erneut und
-zeigt `BodyWeight` immer mit geschaetztem kg-Wert an.
+BodyMorpher is a portable offline save editor for The Parasites. It can edit
+existing body values, morph values, discovered character skill values, Entities,
+and existing Totem/parasite skills. The tool creates backups, writes only
+existing save fields, verifies written files by decoding them again, and shows
+`BodyWeight` with an estimated kg value.

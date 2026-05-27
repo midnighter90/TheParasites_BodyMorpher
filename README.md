@@ -14,11 +14,8 @@ No compatibility is promised for other game versions.
 
 ## Download
 
-Download the ready-to-run release ZIP from GitHub Releases:
-
-```text
-https://github.com/midnighter90/TheParasites_BodyMorpher/releases/tag/v1.0.0
-```
+Download the ready-to-run release ZIP from this repository's GitHub Releases
+page.
 
 Use the attached file:
 
